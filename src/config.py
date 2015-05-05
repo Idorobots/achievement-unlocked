@@ -50,7 +50,6 @@ class Config:
     @staticmethod
     def fromfile(path, fallback_path):
         config = Config({})
-        fallback_path = os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "../config.json")
         config.__init_config_from_file(fallback_path)
         if path is not None:
             config.__init_config_from_file(path)
