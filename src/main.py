@@ -1,6 +1,8 @@
 import argparse
 import bottle
 import config
+import os
+import sys
 import pymysql
 pymysql.install_as_MySQLdb() # Hax for python2 compatibility.
 import bottle_mysql
@@ -49,7 +51,8 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config = config.load(args.config)
+    config = config.load(path=args.config,
+                         fallback_path=os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "../config.json"))
 
     # DB setup:
     app = bottle.default_app()
