@@ -32,7 +32,7 @@ class Config:
             return default
 
     def __getattr__(self, key):
-        return Config.subConfig(self.config[key])
+        return Config.subConfig(self.__config[key])
 
     def __str__(self):
         return self.__config.__str__()
