@@ -1,7 +1,7 @@
 {
     "stats": {
         "default": {
-            "threshold": [100, 1000],
+            "thresholds": [10000, 100000],
             "levels": [
                 "Babies first steps.",
                 "Keep up the good work!",
@@ -10,11 +10,20 @@
         },
         
         "accelerometer": {
-            "tables": ["accelerometer"],
+            "tables" = ["accelerometer"]
             "levels": [
                 "Shake",
                 "Shake-shake",
                 "Shake your booty!"
+            ]
+        }
+
+        "aplications" {
+            "tables": [
+                "applications_foreground",
+                "applications_history",
+                "applications_notifications",
+                "applications_crashes"
             ]
         }
     }
