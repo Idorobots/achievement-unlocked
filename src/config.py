@@ -2,6 +2,17 @@ import json
 import jsoncomment
 
 
+class ValidationError(Exception):
+    def __init__(self, errors):
+        errs = []
+        for kp, v in errors.items():
+            for ks, msgs in v.items():
+                k = kp + '.' + ks
+                errs += ["{} for '{}'".format(m, k) for m in msgs]
+        message = "Validation failed:\n\t{}".format("\n\t".join(errs))
+        super(ValidationError, self).__init__(message)
+
+
 class Config:
     def __init_config_from_file(self, path):
         def add_dict(config, d):
@@ -24,6 +35,34 @@ class Config:
                             v[opt] = default[opt]
         add_defaults(subconfig=self.__config['stats'],
                      optional=['thresholds', 'levels'])
+
+    def validate(self):
+        def validate(subconfig, validators):
+            errors = {}
+            for k in subconfig.keys():
+                c = subconfig[k]
+                msgs = [m for v, m in validators if not v(k, c)]
+                if msgs:
+                    errors[k] = msgs
+            return errors
+        errors = {
+            'stats': validate(
+                subconfig=self.__config['stats'],
+                validators=[
+                    (
+                        lambda k, c: k == 'default' or ('tables' in c and c['tables']),
+                        "At least one table should be defined"
+                    ),
+                    (
+                        lambda k, c: len(c['levels']) == len(c['thresholds']) + 1,
+                        "Wrong quantity of thresholds defined for specified levels"
+                    )
+                ]
+            )
+        }
+        errors = {k: v for k, v in errors.items() if v}
+        if errors:
+            raise ValidationError(errors)
 
     def __init__(self, config):
         self.__config = config
@@ -76,4 +115,5 @@ class Config:
 def load(path, fallback_path):
     config = Config.from_file(path, fallback_path)
     config.add_defaults()
+    config.validate()
     return config
