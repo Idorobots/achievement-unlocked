@@ -4,9 +4,15 @@ import jsoncomment
 
 class Config:
     def __init_config_from_file(self, path):
+        def add_dict(config, d):
+            for k, v in d.items():
+                if k in config and isinstance(config[k], dict) and isinstance(v, dict):
+                    add_dict(config=config[k], d=v)
+                else:
+                    config[k] = v
         with open(path) as f:
-            for k, v in jsoncomment.JsonComment(json).loads(f.read()).items():
-                self.__config[k] = v
+            add_dict(config=self.__config,
+                     d=jsoncomment.JsonComment(json).loads(f.read()))
 
     def __init__(self, config):
         self.__config = config
