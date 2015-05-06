@@ -14,6 +14,17 @@ class Config:
             add_dict(config=self.__config,
                      d=jsoncomment.JsonComment(json).loads(f.read()))
 
+    def add_defaults(self):
+        def add_defaults(subconfig, optional, default_key='default'):
+            default = subconfig[default_key]
+            for k, v in subconfig.items():
+                if k != default_key:
+                    for opt in optional:
+                        if opt not in v:
+                            v[opt] = default[opt]
+        add_defaults(subconfig=self.__config['stats'],
+                     optional=['thresholds', 'levels'])
+
     def __init__(self, config):
         self.__config = config
 
@@ -27,7 +38,7 @@ class Config:
                     config = value
                 else:
                     raise KeyError
-            return Config.subConfig(config[keys[-1]])
+            return Config.sub_config(config[keys[-1]])
         except KeyError:
             raise KeyError(path)
 
@@ -38,7 +49,7 @@ class Config:
             return default
 
     def __getattr__(self, key):
-        return Config.subConfig(self.__config[key])
+        return Config.sub_config(self.__config[key])
 
     def __str__(self):
         return self.__config.__str__()
@@ -47,14 +58,14 @@ class Config:
         return self.__config.__repr__()
 
     @staticmethod
-    def subConfig(value):
+    def sub_config(value):
         if isinstance(value, dict):
             return Config(value)
         else:
             return value
 
     @staticmethod
-    def fromfile(path, fallback_path):
+    def from_file(path, fallback_path):
         config = Config({})
         config.__init_config_from_file(fallback_path)
         if path is not None:
@@ -63,5 +74,6 @@ class Config:
 
 
 def load(path, fallback_path):
-    assert(fallback_path is not None)
-    return Config.fromfile(path, fallback_path)
+    config = Config.from_file(path, fallback_path)
+    config.add_defaults()
+    return config
