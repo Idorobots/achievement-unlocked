@@ -1,0 +1,8 @@
+{
+    "stats": {
+        "default": {
+            "thresholds": [10, 100],
+            "levels": ["a", "b", "c"]
+        }
+    }
+}

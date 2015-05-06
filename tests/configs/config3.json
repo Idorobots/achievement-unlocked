@@ -1,0 +1,17 @@
+{
+    "stats": {
+        "a": {
+            "tables": [],
+            "levels": ["A", "B", "C"]
+        },
+        "b": {
+            "tables": ["b1", "b2", "b3"],
+            "levels": ["a", "b", "c", "d"]
+        },
+        "c": {
+            "tables": ["c"],
+            "thresholds": []
+        },
+        "d": {}
+    }
+}
