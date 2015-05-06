@@ -96,6 +96,15 @@ class Config:
     def __repr__(self):
         return self.__config.__repr__()
 
+    def items(self):
+        return [(k, Config.sub_config(v)) for k, v in self.__config.items()]
+
+    def keys(self):
+        return self.__config.keys()
+
+    def values(self):
+        return [Config.sub_config(v) for v in self.__config.values()]
+
     @staticmethod
     def sub_config(value):
         if isinstance(value, dict):
