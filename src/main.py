@@ -1,11 +1,15 @@
 import argparse
 import bottle
 import config
+import logging
 import os
 import sys
 import pymysql
 pymysql.install_as_MySQLdb() # Hax for python2 compatibility.
 import bottle_mysql
+
+
+global conf
 
 
 @bottle.get('/hello')
@@ -44,6 +48,7 @@ def status404(_):
     bottle.response.content_type = 'application/json'
     return '{"result": "Not found!"}'
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-c", "--config", help="location of additional configuration file")
@@ -51,21 +56,24 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config = config.load(path=args.config,
-                         fallback_path=os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "../config.json"))
+    conf = config.load(path=args.config,
+                       fallback_path=os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "../config.json"))
 
     # DB setup:
     app = bottle.default_app()
-    plugin = bottle_mysql.Plugin(dbhost=config.get('db.host', "localhost"),
-                                 dbport=config.get('db.port', 3306),
-                                 dbname=config.get('db.name', "aware"),
-                                 dbuser=config.get('db.user', "achievement"),
-                                 dbpass=config.get('db.pass'))
+    app.catchall = True
+    plugin = bottle_mysql.Plugin(dbhost=conf.get('db.host', "localhost"),
+                                 dbport=conf.get('db.port', 3306),
+                                 dbname=conf.get('db.name', "aware"),
+                                 dbuser=conf.get('db.user', "achievement"),
+                                 dbpass=conf.get('db.pass'))
     app.install(plugin)
 
-    host = config.get('app.host', "0.0.0.0")
-    port = config.get('app.port', 8080)
+    host = conf.get('app.host', "0.0.0.0")
+    port = conf.get('app.port', 8080)
     if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
         bottle.run(host=host, port=port, reloader=True)
     else:
+        logging.basicConfig(level=logging.INFO)
         bottle.run(host=host, port=port, server="eventlet")  # reload doesn't work with eventlet server
