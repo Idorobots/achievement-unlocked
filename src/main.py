@@ -1,6 +1,7 @@
 import argparse
 import bottle
 import config
+import errors
 import logging
 import os
 import sys
@@ -73,7 +74,7 @@ def user_achievements(device_id, db):
     elif filter_by in badges_handler:
         badges = {filter_by: badges_handler[filter_by]()}
     else:
-        return error("malformed query param: '{}'".format(filter_by), code=400)
+        return error(errors.UnknownAchievementFilter(filter_by))
     return {'badges': badges}
 
 
@@ -81,7 +82,7 @@ def user_achievements(device_id, db):
 def user_achievement_by_id(device_id, achievement_id, db):
     badge_config = conf.badges.regular.get(achievement_id, None)
     if badge_config is None:
-        return error("unknown id: '{}'".format(achievement_id), code=404)
+        return error(errors.UnknownAchievementId(achievement_id))
     else:
         badge = regular_badge_for(db=db, subconfig=badge_config, device_id=device_id)
         return {'id': achievement_id, 'badge': badge}
@@ -117,9 +118,10 @@ def regular_badge_for(db, subconfig, device_id):
     return badge
 
 
-def error(msg, code):
-    bottle.response.status = 404
-    return {'error': msg}
+def error(err):
+    assert isinstance(err, errors.ApiError)
+    bottle.response.status = err.http_code
+    return err.to_dict()
 
 
 if __name__ == "__main__":
