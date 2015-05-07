@@ -13,7 +13,7 @@ class ValidationError(Exception):
         super(ValidationError, self).__init__(message)
 
 
-class Config:
+class Config(object):
     def __init_config_from_file(self, path):
         def add_dict(config, d):
             for k, v in d.items():
@@ -33,8 +33,8 @@ class Config:
                     for opt in optional:
                         if opt not in v:
                             v[opt] = default[opt]
-        add_defaults(subconfig=self.__config['badges']['regular'],
-                     optional=['thresholds', 'levels'])
+        add_defaults(subconfig=self.__config['achievements']['regular'],
+                     optional=['thresholds', 'badges'])
 
     def validate(self):
         def validate(subconfig, validators):
@@ -46,16 +46,16 @@ class Config:
                     errors[k] = msgs
             return errors
         errors = {
-            'badges.regular': validate(
-                subconfig=self.__config['badges']['regular'],
+            'achievements.regular': validate(
+                subconfig=self.__config['achievements']['regular'],
                 validators=[
                     (
                         lambda k, c: k == 'default' or ('tables' in c and c['tables']),
                         "At least one table should be defined"
                     ),
                     (
-                        lambda k, c: len(c['levels']) == len(c['thresholds']) + 1,
-                        "Wrong quantity of thresholds defined for specified levels"
+                        lambda k, c: len(c['badges']) == len(c['thresholds']) + 1,
+                        "Wrong quantity of thresholds defined for specified badges"
                     )
                 ]
             )

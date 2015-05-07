@@ -1,9 +1,9 @@
 {
-    "badges": {
+    "achievements": {
         "regular": {
             "default": {
                 "thresholds": [10000, 100000],
-                "levels": [
+                "badges": [
                     "Babies first steps.",
                     "Keep up the good work!",
                     "We're gonna need MapReduce here..."
@@ -12,7 +12,7 @@
             
             "accelerometer": {
                 "tables": ["accelerometer"],
-                "levels": [
+                "badges": [
                     "Shake",
                     "Shake-shake",
                     "Shake your booty!"
@@ -30,7 +30,7 @@
 
             "barometer": {
                 "tables": ["barometer"],
-                "levels": [
+                "badges": [
                     "Pascal",
                     "Baribal",
                     "Hg-rid"
@@ -43,7 +43,7 @@
                     "battery_discharges",
                     "battery_charges"
                 ],
-                "levels": [       
+                "badges": [       
                     "Volt",
                     "Ampere",
                     "Tesla"
@@ -52,7 +52,7 @@
 
             "bluetooth": {
                 "tables": ["bluetooth"],
-                "levels": [              
+                "badges": [              
                     "Harald Blåtand Gormsen",
                     "Mieszko I",
                     "Charlemagne"
@@ -64,7 +64,7 @@
                     "calls",
                     "messages"
                 ],
-                "levels": [              
+                "badges": [              
                     "Introvert",
                     "Extrovert",
                     "Hi Kim, it's Jack... Please respond..."
@@ -77,7 +77,7 @@
 
             "gravity": {
                 "tables": ["gravity"],
-                "levels": [               
+                "badges": [               
                     "The Sun",
                     "Neutron star",
                     "Black hole"
@@ -86,7 +86,7 @@
 
             "gyroscope": {
                 "tables": ["gyroscope"],
-                "levels": [                
+                "badges": [                
                     "Drunk",
                     "Cat",
                     "Crane"
@@ -99,7 +99,7 @@
 
             "light": {
                 "tables": ["light"],
-                "levels": [               
+                "badges": [               
                     "Edison",
                     "Tesla",
                     "Lucifer"
@@ -108,7 +108,7 @@
 
             "linear_accelerometer": {
                 "tables": ["linear_accelerometer"],
-                "levels": [              
+                "badges": [              
                     "Warp 1",
                     "Warp 2",
                     "Warp 3"
@@ -117,7 +117,7 @@
 
             "locations": {
                 "tables": ["locations"],
-                "levels": [               
+                "badges": [               
                     "Turist",
                     "Globetrotter",
                     "Omnipresent"
@@ -126,7 +126,7 @@
 
             "magnetometer": {
                 "tables": ["magnetometer"],
-                "levels": [              
+                "badges": [              
                     "Hematite",
                     "Magnetite",
                     "Neodymium"
@@ -145,7 +145,7 @@
                     "network",
                     "network_traffic"
                 ],
-                "levels": [              
+                "badges": [              
                     "Hive",
                     "Termit mound",
                     "Borg collective"
@@ -154,7 +154,7 @@
 
             "keyboard": {
                 "tables": ["keyboard"],
-                "levels": [                
+                "badges": [                
                     "QWERTY",
                     "Colemak",
                     "Dvorak"
@@ -163,7 +163,7 @@
 
             "processor": {
                 "tables": ["processor"],
-                "levels": [                
+                "badges": [                
                     "Celeron",
                     "IBM Watson",
                     "D-Wave"
@@ -172,7 +172,7 @@
 
             "proximity": {
                 "tables": ["proximity"],
-                "levels": [               
+                "badges": [               
                     "Ion bond",
                     "Atom bond",
                     "Quark-gluon plasma"
@@ -181,7 +181,7 @@
 
             "rotation": {
                 "tables": ["rotation"],
-                "levels": [                
+                "badges": [                
                     "CCW",
                     "Dreidel",
                     "Quantum Entanglement"
@@ -190,7 +190,7 @@
 
             "screen": {
                 "tables": ["screen"],
-                "levels": [               
+                "badges": [               
                     "E-Ink",
                     "LCD",
                     "Hologram"
@@ -208,7 +208,7 @@
 
             "temperature": {
                 "tables": ["temperature"],
-                "levels": [                
+                "badges": [                
                     "Hel",
                     "Peltier",
                     "Prometheus"
@@ -217,7 +217,7 @@
 
             "wifi": {
                 "tables": ["wifi"],
-                "levels": [                
+                "badges": [                
                     "Wave",
                     "Flood",
                     "Tsunami"

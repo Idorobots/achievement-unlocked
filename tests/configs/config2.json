@@ -1,8 +1,10 @@
 {
-    "stats": {
-        "a": {
-            "levels": ["A", "B", "C"]
-        },
-        "b": {}
+    "achievements": {
+        "regular": {
+            "a": {
+                "badges": ["A", "B", "C"]
+            },
+            "b": {}
+        }
     }
 }

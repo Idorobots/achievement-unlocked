@@ -52,39 +52,38 @@ def user_ranking_by_id(device_id, stat_id, db):
 
 @bottle.get('/users/:device_id/achievements')
 def user_achievements(device_id, db):
-    def regular_badges():
-        badges = []
-        for badge_id, badge_config in conf.badges.regular.items():
-            if badge_id != 'default':
-                badge = regular_badge_for(db=db, subconfig=badge_config, device_id=device_id)
+    def regular_achievements():
+        achievements = []
+        for achievement_id, achievement in conf.achievements.regular.items():
+            if achievement_id != 'default':
+                badge = regular_badge_for(db=db, achievement=achievement, device_id=device_id)
                 if badge is not None:
-                    badges.append({
-                        'id': badge_id,
+                    achievements.append({
+                        'id': achievement_id,
                         'badge': badge
                     })
-        return badges
+        return achievements
 
-    badges_handler = {
-        'regular': regular_badges
+    achievements_handler = {
+        'regular': regular_achievements
     }
     filter_by = bottle.request.query.filter
-    print('filter ' + filter_by)
     if not filter_by:
-        badges = {k: v() for k, v in badges_handler.items()}
-    elif filter_by in badges_handler:
-        badges = {filter_by: badges_handler[filter_by]()}
+        achievements = {k: v() for k, v in achievements_handler.items()}
+    elif filter_by in achievements_handler:
+        achievements = {filter_by: achievements_handler[filter_by]()}
     else:
         return error(errors.UnknownAchievementFilter(filter_by))
-    return {'badges': badges}
+    return {'achievements': achievements}
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id')
 def user_achievement_by_id(device_id, achievement_id, db):
-    badge_config = conf.badges.regular.get(achievement_id, None)
-    if badge_config is None:
+    achievement = conf.achievements.regular.get(achievement_id, None)
+    if achievement is None:
         return error(errors.UnknownAchievementId(achievement_id))
     else:
-        badge = regular_badge_for(db=db, subconfig=badge_config, device_id=device_id)
+        badge = regular_badge_for(db=db, achievement=achievement, device_id=device_id)
         return {'id': achievement_id, 'badge': badge}
 
 
@@ -95,26 +94,26 @@ def status404(_):
 
 
 @unsafe()
-def regular_badge_for(db, subconfig, device_id):
+def regular_badge_for(db, achievement, device_id):
     badge = None
     template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
-    sub_queries = [template.format(table=table) for table in subconfig.tables]
+    sub_queries = [template.format(table=table) for table in achievement.tables]
     query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
 
     db.execute(query, {'device_id': device_id})
 
     count = db.fetchone()['result']
-    thresholds = subconfig.thresholds
-    levels = subconfig.levels
+    thresholds = achievement.thresholds
+    badges = achievement.badges
 
     if count > 0:
         prev_threshold = 0
         for (idx, threshold) in enumerate(thresholds):
             if prev_threshold < count <= threshold:
-                badge = levels[idx]
+                badge = badges[idx]
                 break
         if count >= thresholds[-1]:
-            badge = levels[-1]
+            badge = badges[-1]
     return badge
 
 

@@ -1,8 +1,10 @@
 {
-    "stats": {
-        "default": {
-            "thresholds": [10, 100],
-            "levels": ["a", "b", "c"]
+    "achievements": {
+        "regular": {
+            "default": {
+                "thresholds": [10, 100],
+                "badges": ["a", "b", "c"]
+            }
         }
     }
 }
