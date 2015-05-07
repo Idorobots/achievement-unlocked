@@ -33,7 +33,7 @@ class Config:
                     for opt in optional:
                         if opt not in v:
                             v[opt] = default[opt]
-        add_defaults(subconfig=self.__config['stats'],
+        add_defaults(subconfig=self.__config['badges']['regular'],
                      optional=['thresholds', 'levels'])
 
     def validate(self):
@@ -46,8 +46,8 @@ class Config:
                     errors[k] = msgs
             return errors
         errors = {
-            'stats': validate(
-                subconfig=self.__config['stats'],
+            'badges.regular': validate(
+                subconfig=self.__config['badges']['regular'],
                 validators=[
                     (
                         lambda k, c: k == 'default' or ('tables' in c and c['tables']),
