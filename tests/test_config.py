@@ -62,18 +62,20 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(
             self.unpack(c),
             {
-                "stats": {
-                    "default": {
-                        "thresholds": [10, 100],
-                        "levels": ["a", "b", "c"]
-                    },
-                    "a": {
-                        "thresholds": [10, 100],
-                        "levels": ["A", "B", "C"]
-                    },
-                    "b": {
-                        "thresholds": [10, 100],
-                        "levels": ["a", "b", "c"]
+                "achievements": {
+                    "regular": {
+                        "default": {
+                            "thresholds": [10, 100],
+                            "badges": ["a", "b", "c"]
+                        },
+                        "a": {
+                            "thresholds": [10, 100],
+                            "badges": ["A", "B", "C"]
+                        },
+                        "b": {
+                            "thresholds": [10, 100],
+                            "badges": ["a", "b", "c"]
+                        }
                     }
                 }
             }
@@ -87,16 +89,28 @@ class TestConfig(unittest.TestCase):
                       validate=True)
         msg = cm.exception.__str__()
         self.assertTrue(
-            self.is_subsequence("At least one table should be defined for 'stats.a'", msg)
+            self.is_subsequence(
+                "At least one table should be defined for 'achievements.regular.a'",
+                of=msg
+            )
         )
         self.assertTrue(
-            self.is_subsequence("Wrong quantity of thresholds defined for specified levels for 'stats.b'", msg)
+            self.is_subsequence(
+                "Wrong quantity of thresholds defined for specified badges for 'achievements.regular.b'",
+                of=msg
+            )
         )
         self.assertTrue(
-            self.is_subsequence("Wrong quantity of thresholds defined for specified levels for 'stats.c'", msg)
+            self.is_subsequence(
+                "Wrong quantity of thresholds defined for specified badges for 'achievements.regular.c'",
+                of=msg
+            )
         )
         self.assertTrue(
-            self.is_subsequence("At least one table should be defined for 'stats.d'", msg)
+            self.is_subsequence(
+                "At least one table should be defined for 'achievements.regular.d'",
+                of=msg
+            )
         )
 
 if __name__ == '__main__':
