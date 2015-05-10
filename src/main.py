@@ -47,9 +47,12 @@ def user_ranking(device_id, db):
 
 
 @bottle.get('/users/:device_id/ranking/:achievement_id')
-def user_ranking_by_id(device_id, stat_id, db):
+def user_ranking_by_id(device_id, achievement_id, db):
     try:
-        config = conf.achievements.get(achievement_id, None)
+        config = conf.achievements.get(achievement_id)
+        if config == None:
+            raise errors.UnknownAchievementId(achievement_id)
+
         return handlers.dispatch_ranking(device_id, achievement_id, config, db)
 
     except errors.AppError as e:
@@ -68,7 +71,10 @@ def user_achievements(device_id, db):
 @bottle.get('/users/:device_id/achievements/:achievement_id')
 def user_achievement_by_id(device_id, achievement_id, db):
     try:
-        config = conf.achievements.get(achievement_id, None)
+        config = conf.achievements.get(achievement_id)
+        if config == None:
+            raise errors.UnknownAchievementId(achievement_id)
+
         return handlers.dispatch_achievement(device_id, achievement_id, config, db)
 
     except errors.AppError as e:
@@ -89,6 +95,11 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
     conf = config.load(path=args.config,
                        fallback_path=os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), "../config.json"))
 
@@ -104,9 +115,8 @@ if __name__ == "__main__":
 
     host = conf.get('app.host', "0.0.0.0")
     port = conf.get('app.port', 8080)
+
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
         bottle.run(host=host, port=port, reloader=True)
     else:
-        logging.basicConfig(level=logging.INFO)
         bottle.run(host=host, port=port, server="eventlet")  # reload doesn't work with eventlet server

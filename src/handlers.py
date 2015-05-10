@@ -3,8 +3,8 @@ import middleware
 
 
 @middleware.unsafe()
-def regular_badge(device_id, achievement_id, config, db):
-    logging.debug("regular_badge @ {}/{}".format(device_id, achievement_id))
+def count_based_badge(device_id, achievement_id, config, db):
+    logging.debug("count_based_badge @ {}/{}".format(device_id, achievement_id))
     badge = None
     template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
     sub_queries = [template.format(table=table) for table in config.tables]
@@ -33,7 +33,7 @@ def dispatch(handlers, device_id, achievement_id, config, db):
     return handlers[config.get("handler")](device_id, achievement_id, config, db)
 
 achievement_handlers = {
-    "regular": regular_badge
+    "count_based": count_based_badge
 }
 
 def dispatch_achievement(device_id, achievement_id, config, db):

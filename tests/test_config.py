@@ -11,12 +11,15 @@ class TestConfig(unittest.TestCase):
         path = None
         if name is not None:
             path = "tests/configs/{}.json".format(name)
+
         fallback_path = None
         if fallback_name is not None:
             fallback_path = "tests/configs/{}.json".format(fallback_name)
+
         c = config.Config.from_file(path=path, fallback_path=fallback_path)
         if (add_defaults):
             c.add_defaults()
+
         if (validate):
             c.validate()
         return c
@@ -63,19 +66,15 @@ class TestConfig(unittest.TestCase):
             self.unpack(c),
             {
                 "achievements": {
-                    "regular": {
-                        "default": {
-                            "thresholds": [10, 100],
-                            "badges": ["a", "b", "c"]
-                        },
-                        "a": {
-                            "thresholds": [10, 100],
-                            "badges": ["A", "B", "C"]
-                        },
-                        "b": {
-                            "thresholds": [10, 100],
-                            "badges": ["a", "b", "c"]
-                        }
+                    "a": {
+                        "thresholds": [10, 100],
+                        "badges": ["A", "B", "C"],
+                        "handlers": {"x" : "y"}
+                    },
+                    "b": {
+                        "thresholds": [10, 100],
+                        "badges": ["a", "b", "c"],
+                        "handlers": {"x" : "y"}
                     }
                 }
             }
@@ -87,28 +86,29 @@ class TestConfig(unittest.TestCase):
                       fallback_name='fallback_config2',
                       add_defaults=True,
                       validate=True)
+
         msg = cm.exception.__str__()
         self.assertTrue(
             self.is_subsequence(
-                "At least one table should be defined for 'achievements.regular.a'",
+                "At least one table should be defined for 'achievements.a'",
                 of=msg
             )
         )
         self.assertTrue(
             self.is_subsequence(
-                "Wrong quantity of thresholds defined for specified badges for 'achievements.regular.b'",
+                "Wrong quantity of thresholds defined for specified badges for 'achievements.b'",
                 of=msg
             )
         )
         self.assertTrue(
             self.is_subsequence(
-                "Wrong quantity of thresholds defined for specified badges for 'achievements.regular.c'",
+                "Wrong quantity of thresholds defined for specified badges for 'achievements.c'",
                 of=msg
             )
         )
         self.assertTrue(
             self.is_subsequence(
-                "At least one table should be defined for 'achievements.regular.d'",
+                "At least one table should be defined for 'achievements.d'",
                 of=msg
             )
         )

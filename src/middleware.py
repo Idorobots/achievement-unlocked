@@ -1,3 +1,5 @@
+import logging
+
 class unsafe(object):
     func = None
 
@@ -10,5 +12,6 @@ class unsafe(object):
             return self
         try:
             return self.func(*args, **kwargs)
-        except:
+        except Exception as e:
+            logging.error("Caught an exception: {}".format(e))
             return self.fallback
