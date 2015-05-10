@@ -55,3 +55,9 @@ class UnknownAchievementId(ApiError):
     @property
     def http_code(self):
         return 404
+
+
+def error(err):
+    assert isinstance(err, errors.ApiError)
+    bottle.response.status = err.http_code
+    return err.to_dict()

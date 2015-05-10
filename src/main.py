@@ -2,6 +2,7 @@ import argparse
 import bottle
 import config
 import errors
+import handlers
 import logging
 import os
 import sys
@@ -9,24 +10,7 @@ import pymysql
 pymysql.install_as_MySQLdb() # Hax for python2 compatibility.
 import bottle_mysql
 
-
 global conf
-
-
-class unsafe(object):
-    func = None
-
-    def __init__(self, fallback=None):
-        self.fallback = fallback
-
-    def __call__(self, *args, **kwargs):
-        if self.func is None:
-            self.func = args[0]
-            return self
-        try:
-            return self.func(*args, **kwargs)
-        except:
-            return self.fallback
 
 
 @bottle.get('/hello')
@@ -56,7 +40,7 @@ def user_achievements(device_id, db):
         achievements = []
         for achievement_id, achievement in conf.achievements.regular.items():
             if achievement_id != 'default':
-                badge = regular_badge_for(db=db, achievement=achievement, device_id=device_id)
+                badge = handlers.regular_badge_for(db=db, achievement=achievement, device_id=device_id)
                 if badge is not None:
                     achievements.append({
                         'id': achievement_id,
@@ -73,7 +57,7 @@ def user_achievements(device_id, db):
     elif filter_by in achievements_handler:
         achievements = {filter_by: achievements_handler[filter_by]()}
     else:
-        return error(errors.UnknownAchievementFilter(filter_by))
+        return errors.error(errors.UnknownAchievementFilter(filter_by))
     return {'achievements': achievements}
 
 
@@ -81,9 +65,9 @@ def user_achievements(device_id, db):
 def user_achievement_by_id(device_id, achievement_id, db):
     achievement = conf.achievements.regular.get(achievement_id, None)
     if achievement is None:
-        return error(errors.UnknownAchievementId(achievement_id))
+        return errors.error(errors.UnknownAchievementId(achievement_id))
     else:
-        badge = regular_badge_for(db=db, achievement=achievement, device_id=device_id)
+        badge = handlers.regular_badge_for(db=db, achievement=achievement, device_id=device_id)
         return {'id': achievement_id, 'badge': badge}
 
 
@@ -91,37 +75,6 @@ def user_achievement_by_id(device_id, achievement_id, db):
 def status404(_):
     bottle.response.content_type = 'application/json'
     return '{"error": "not found"}'
-
-
-@unsafe()
-def regular_badge_for(db, achievement, device_id):
-    badge = None
-    template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
-    sub_queries = [template.format(table=table) for table in achievement.tables]
-    query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
-
-    db.execute(query, {'device_id': device_id})
-
-    count = db.fetchone()['result']
-    thresholds = achievement.thresholds
-    badges = achievement.badges
-
-    if count > 0:
-        prev_threshold = 0
-        for (idx, threshold) in enumerate(thresholds):
-            if prev_threshold < count <= threshold:
-                badge = badges[idx]
-                break
-        if count >= thresholds[-1]:
-            badge = badges[-1]
-    return badge
-
-
-def error(err):
-    assert isinstance(err, errors.ApiError)
-    bottle.response.status = err.http_code
-    return err.to_dict()
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
