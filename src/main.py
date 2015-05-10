@@ -27,7 +27,7 @@ def ranking_all(db):
 
 
 @bottle.get('/ranking/:achievement_id')
-def raknig_by_id(achievement_id, db):
+def rankig_by_id(achievement_id, db):
     pass
 
 
