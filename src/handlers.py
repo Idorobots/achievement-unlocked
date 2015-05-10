@@ -38,6 +38,19 @@ def count_based_badge(device_id, achievement_id, config, db):
 def count_based_place(device_id, achievement_id, config, db):
     logging.debug("count_based_place @ {}/{}".format(device_id, achievement_id))
 
+    def index_of(l, key):
+        for i, u in enumerate(l):
+            if u["device_id"] == key:
+                u["rank"] = i
+                return u
+        return None
+
+    return index_of(count_based_ranking(None, achievement_id, config, db), device_id) # FIXME Get rid of the None.
+
+@middleware.unsafe()
+def count_based_ranking(_device_id, achievement_id, config, db):
+    logging.debug("count_based_ranking @ {}".format(achievement_id))
+
     def merge(x, y):
         for (k, v) in y.items():
             if k in x:
@@ -46,25 +59,19 @@ def count_based_place(device_id, achievement_id, config, db):
                 x[k] = v
         return x
 
-    def index_of(m, key):
-        for i, k in enumerate(sorted(m, key = lambda k: m[k])):
-            if k == key:
-                return i
-        return None
-
     ranking = {}
     for table in config.tables:
         db.execute("SELECT device_id, count(*) AS 'count' FROM {} GROUP BY device_id;".format(table))
         counts = {record["device_id"]: record["count"] for record in db.fetchall()} # Might need a cursor
         ranking = merge(ranking, counts)
 
-    return {"rank": index_of(ranking, device_id),
-            "count": ranking[device_id]}
+    keys = sorted(ranking, key = lambda k: ranking[k])
+    return [{"device_id": k, "count": ranking[k]} for k in keys]
 
 
 # Handler dispatch:
 @middleware.unsafe()
-def dispatch(handlers, device_id, achievement_id, config, db):
+def dispatch(handlers, device_id, achievement_id, config, db): # FIXME Remove all the duplication :(
     return handlers[config.get("handler")](device_id, achievement_id, config, db)
 
 achievement_handlers = {
@@ -75,8 +82,16 @@ def dispatch_achievement(device_id, achievement_id, config, db):
     return dispatch(achievement_handlers, device_id, achievement_id, config, db)
 
 
-ranking_handlers = {
+user_ranking_handlers = {
     "count_based": count_based_place
+}
+
+def dispatch_user_ranking(device_id, achievement_id, config, db):
+    return dispatch(user_ranking_handlers, device_id, achievement_id, config, db)
+
+
+ranking_handlers = {
+    "count_based": count_based_ranking
 }
 
 def dispatch_ranking(device_id, achievement_id, config, db):

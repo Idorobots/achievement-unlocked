@@ -4,6 +4,7 @@ import config
 import errors
 import filters
 import handlers
+import json
 import logging
 import os
 import sys
@@ -23,12 +24,26 @@ def hello(db):
 # Ranking
 @bottle.get('/ranking')
 def ranking_all(db):
-    pass
+    try:
+        config = filters.filter(bottle.request.query.filter, conf.achievements)
+        return {a: handlers.dispatch_ranking(None, a, c, db) for a, c in config.items()} # FIXME Get rid of the None
+    except errors.AppError as e:
+        return e.to_dict()
 
 
 @bottle.get('/ranking/:achievement_id')
 def rankig_by_id(achievement_id, db):
-    pass
+    try:
+        config = conf.achievements.get(achievement_id)
+        if config == None:
+            raise errors.UnknownAchievementId(achievement_id)
+
+        # NOTE Can't return arrays to Bottle :(
+        bottle.response.content_type = "application/json"
+        return json.dumps(handlers.dispatch_ranking(None, achievement_id, config, db)) # FIXME Get rid of the None
+
+    except errors.AppError as e:
+        return e.to_dict()
 
 
 # Users
@@ -50,7 +65,7 @@ def user_all(device_id, db):
 def user_ranking(device_id, db):
     try:
         config = filters.filter(bottle.request.query.filter, conf.achievements)
-        return {a: handlers.dispatch_ranking(device_id, a, c, db) for a, c in config.items()}
+        return {a: handlers.dispatch_user_ranking(device_id, a, c, db) for a, c in config.items()}
     except errors.AppError as e:
         return e.to_dict()
 
@@ -62,7 +77,7 @@ def user_ranking_by_id(device_id, achievement_id, db):
         if config == None:
             raise errors.UnknownAchievementId(achievement_id)
 
-        return handlers.dispatch_ranking(device_id, achievement_id, config, db)
+        return handlers.dispatch_user_ranking(device_id, achievement_id, config, db)
 
     except errors.AppError as e:
         return e.to_dict()
