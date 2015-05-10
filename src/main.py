@@ -2,6 +2,7 @@ import argparse
 import bottle
 import config
 import errors
+import filters
 import handlers
 import logging
 import os
@@ -12,69 +13,74 @@ import bottle_mysql
 
 global conf
 
-
-@bottle.get('/hello')
+# App status
+@bottle.get('/status')
 def hello(db):
-    db.execute("SELECT 'Hello world!' AS 'result';")
+    db.execute("SELECT 'running' AS 'status';")
     return db.fetchone()
 
 
+# Ranking
+@bottle.get('/ranking')
+def ranking_all(db):
+    pass
+
+
+@bottle.get('/ranking/:achievement_id')
+def raknig_by_id(achievement_id, db):
+    pass
+
+
+# Users
 @bottle.get('/users/:device_id')
-def users_all(device_id, db):
+def user_all(device_id, db):
     pass
 
 
 @bottle.get('/users/:device_id/ranking')
 def user_ranking(device_id, db):
-    pass
+    try:
+        config = filters.filter(bottle.request.query.filter, conf.achievements)
+        return {a: handlers.dispatch_ranking(device_id, a, c, db) for a, c in config.items()}
+    except errors.AppError as e:
+        return e.to_dict()
 
 
 @bottle.get('/users/:device_id/ranking/:achievement_id')
 def user_ranking_by_id(device_id, stat_id, db):
-    pass
+    try:
+        config = conf.achievements.get(achievement_id, None)
+        return handlers.dispatch_ranking(device_id, achievement_id, config, db)
+
+    except errors.AppError as e:
+        return e.to_dict()
 
 
 @bottle.get('/users/:device_id/achievements')
 def user_achievements(device_id, db):
-    def regular_achievements():
-        achievements = []
-        for achievement_id, achievement in conf.achievements.regular.items():
-            if achievement_id != 'default':
-                badge = handlers.regular_badge_for(db=db, achievement=achievement, device_id=device_id)
-                if badge is not None:
-                    achievements.append({
-                        'id': achievement_id,
-                        'badge': badge
-                    })
-        return achievements
-
-    achievements_handler = {
-        'regular': regular_achievements
-    }
-    filter_by = bottle.request.query.filter
-    if not filter_by:
-        achievements = {k: v() for k, v in achievements_handler.items()}
-    elif filter_by in achievements_handler:
-        achievements = {filter_by: achievements_handler[filter_by]()}
-    else:
-        return errors.error(errors.UnknownAchievementFilter(filter_by))
-    return {'achievements': achievements}
+    try:
+        config = filters.filter(bottle.request.query.filter, conf.achievements)
+        return {a: handlers.dispatch_achievement(device_id, a, c, db) for a, c in config.items()}
+    except errors.AppError as e:
+        return e.to_dict()
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id')
 def user_achievement_by_id(device_id, achievement_id, db):
-    achievement = conf.achievements.regular.get(achievement_id, None)
-    if achievement is None:
-        return errors.error(errors.UnknownAchievementId(achievement_id))
-    else:
-        badge = handlers.regular_badge_for(db=db, achievement=achievement, device_id=device_id)
-        return {'id': achievement_id, 'badge': badge}
+    try:
+        config = conf.achievements.get(achievement_id, None)
+        return handlers.dispatch_achievement(device_id, achievement_id, config, db)
+
+    except errors.AppError as e:
+        return e.to_dict()
 
 
+# Misc
 @bottle.error(404)
 def status404(_):
     bottle.response.content_type = 'application/json'
     return '{"error": "not found"}'
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
