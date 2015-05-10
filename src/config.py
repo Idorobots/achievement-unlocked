@@ -59,7 +59,7 @@ class Config(object):
                         "At least one table should be defined"
                     ),
                     (
-                        lambda k, c: len(c['badges']) == len(c['thresholds']) + 1,
+                        lambda k, c: len(c['badges']) == len(c['thresholds']),
                         "Wrong quantity of thresholds defined for specified badges"
                     ),
                     (

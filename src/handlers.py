@@ -5,7 +5,7 @@ import middleware
 @middleware.unsafe()
 def count_based_badge(device_id, achievement_id, config, db):
     logging.debug("count_based_badge @ {}/{}".format(device_id, achievement_id))
-    badge = None
+
     template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
     sub_queries = [template.format(table=table) for table in config.tables]
     query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
@@ -16,15 +16,22 @@ def count_based_badge(device_id, achievement_id, config, db):
     thresholds = config.thresholds
     badges = config.badges
 
-    if count > 0:
-        prev_threshold = 0
-        for (idx, threshold) in enumerate(thresholds):
-            if prev_threshold < count <= threshold:
-                badge = badges[idx]
-                break
-        if count >= thresholds[-1]:
-            badge = badges[-1]
-    return badge
+    badge = None
+    next_badge_at = thresholds[0]
+
+    for (b, t) in zip(badges, thresholds):
+        if count >= t:
+            badge = b
+        else:
+            next_badge_at = t
+            break
+
+    if count >= thresholds[-1]:
+        next_badge_at = None
+
+    return {"badge": badge,
+            "count": count,
+            "next_badge_at": next_badge_at}
 
 
 @middleware.unsafe()

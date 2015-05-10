@@ -1,7 +1,7 @@
 {
     "achievements": {
         "default": {
-            "thresholds": [10000, 100000],
+            "thresholds": [10000, 100000, 1000000],
 
             "badges": [
                 "Babies first steps.",
