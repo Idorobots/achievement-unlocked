@@ -1,228 +1,231 @@
 {
     "achievements": {
-        "regular": {
-            "default": {
-                "thresholds": [10000, 100000],
-                "badges": [
-                    "Babies first steps.",
-                    "Keep up the good work!",
-                    "We're gonna need MapReduce here..."
-                ]
-            },
-            
-            "accelerometer": {
-                "tables": ["accelerometer"],
-                "badges": [
-                    "Shake",
-                    "Shake-shake",
-                    "Shake your booty!"
-                ]
-            },
+        "default": {
+            "thresholds": [10000, 100000, 1000000],
 
-            "applications": {
-                "tables": [
-                    "applications_foreground",
-                    "applications_history",
-                    "applications_notifications",
-                    "applications_crashes"
-                ]
-            },
+            "badges": [
+                "Babies first steps.",
+                "Keep up the good work!",
+                "We're gonna need MapReduce here..."
+            ],
 
-            "barometer": {
-                "tables": ["barometer"],
-                "badges": [
-                    "Pascal",
-                    "Baribal",
-                    "Hg-rid"
-                ]
+            "handlers" : {
+                "count": "count_based"
             },
+        },
 
-            "battery": {
-                "tables": [
-                    "battery",
-                    "battery_discharges",
-                    "battery_charges"
-                ],
-                "badges": [       
-                    "Volt",
-                    "Ampere",
-                    "Tesla"
-                ]
-            },
+        "accelerometer": {
+            "tables": ["accelerometer"],
+            "badges": [
+                "Shake",
+                "Shake-shake",
+                "Shake your booty!"
+            ]
+        },
 
-            "bluetooth": {
-                "tables": ["bluetooth"],
-                "badges": [              
-                    "Harald Blåtand Gormsen",
-                    "Mieszko I",
-                    "Charlemagne"
-                ]
-            },
+        "applications": {
+            "tables": [
+                "applications_foreground",
+                "applications_history",
+                "applications_notifications",
+                "applications_crashes"
+            ]
+        },
 
-            "communication": {
-                "tables": [
-                    "calls",
-                    "messages"
-                ],
-                "badges": [              
-                    "Introvert",
-                    "Extrovert",
-                    "Hi Kim, it's Jack... Please respond..."
-                ]
-            },
+        "barometer": {
+            "tables": ["barometer"],
+            "badges": [
+                "Pascal",
+                "Baribal",
+                "Hg-rid"
+            ]
+        },
 
-            "esm": {
-                "tables": ["esms"]
-            },
+        "battery": {
+            "tables": [
+                "battery",
+                "battery_discharges",
+                "battery_charges"
+            ],
+            "badges": [
+                "Volt",
+                "Ampere",
+                "Tesla"
+            ]
+        },
 
-            "gravity": {
-                "tables": ["gravity"],
-                "badges": [               
-                    "The Sun",
-                    "Neutron star",
-                    "Black hole"
-                ]
-            },
+        "bluetooth": {
+            "tables": ["bluetooth"],
+            "badges": [
+                "Harald Blåtand Gormsen",
+                "Mieszko I",
+                "Charlemagne"
+            ]
+        },
 
-            "gyroscope": {
-                "tables": ["gyroscope"],
-                "badges": [                
-                    "Drunk",
-                    "Cat",
-                    "Crane"
-                ]
-            },
+        "communication": {
+            "tables": [
+                "calls",
+                "messages"
+            ],
+            "badges": [
+                "Introvert",
+                "Extrovert",
+                "Hi Kim, it's Jack... Please respond..."
+            ]
+        },
 
-            "installations": {
-                "tables": ["installations"]
-            },
+        "esm": {
+            "tables": ["esms"]
+        },
 
-            "light": {
-                "tables": ["light"],
-                "badges": [               
-                    "Edison",
-                    "Tesla",
-                    "Lucifer"
-                ]
-            },
+        "gravity": {
+            "tables": ["gravity"],
+            "badges": [
+                "The Sun",
+                "Neutron star",
+                "Black hole"
+            ]
+        },
 
-            "linear_accelerometer": {
-                "tables": ["linear_accelerometer"],
-                "badges": [              
-                    "Warp 1",
-                    "Warp 2",
-                    "Warp 3"
-                ]
-            },
+        "gyroscope": {
+            "tables": ["gyroscope"],
+            "badges": [
+                "Drunk",
+                "Cat",
+                "Crane"
+            ]
+        },
 
-            "locations": {
-                "tables": ["locations"],
-                "badges": [               
-                    "Turist",
-                    "Globetrotter",
-                    "Omnipresent"
-                ]
-            },
+        "installations": {
+            "tables": ["installations"]
+        },
 
-            "magnetometer": {
-                "tables": ["magnetometer"],
-                "badges": [              
-                    "Hematite",
-                    "Magnetite",
-                    "Neodymium"
-                ]
-            },
+        "light": {
+            "tables": ["light"],
+            "badges": [
+                "Edison",
+                "Tesla",
+                "Lucifer"
+            ]
+        },
 
-            "mqtt": {
-                "tables": [
-                    "mqtt_messages",
-                    "mqtt_subscriptions"
-                ]
-            },
+        "linear_accelerometer": {
+            "tables": ["linear_accelerometer"],
+            "badges": [
+                "Warp 1",
+                "Warp 2",
+                "Warp 3"
+            ]
+        },
 
-            "network": {
-                "tables": [
-                    "network",
-                    "network_traffic"
-                ],
-                "badges": [              
-                    "Hive",
-                    "Termit mound",
-                    "Borg collective"
-                ]
-            },
+        "locations": {
+            "tables": ["locations"],
+            "badges": [
+                "Turist",
+                "Globetrotter",
+                "Omnipresent"
+            ]
+        },
 
-            "keyboard": {
-                "tables": ["keyboard"],
-                "badges": [                
-                    "QWERTY",
-                    "Colemak",
-                    "Dvorak"
-                ]
-            },
+        "magnetometer": {
+            "tables": ["magnetometer"],
+            "badges": [
+                "Hematite",
+                "Magnetite",
+                "Neodymium"
+            ]
+        },
 
-            "processor": {
-                "tables": ["processor"],
-                "badges": [                
-                    "Celeron",
-                    "IBM Watson",
-                    "D-Wave"
-                ]
-            },
+        "mqtt": {
+            "tables": [
+                "mqtt_messages",
+                "mqtt_subscriptions"
+            ]
+        },
 
-            "proximity": {
-                "tables": ["proximity"],
-                "badges": [               
-                    "Ion bond",
-                    "Atom bond",
-                    "Quark-gluon plasma"
-                ]
-            },
+        "network": {
+            "tables": [
+                "network",
+                "network_traffic"
+            ],
+            "badges": [
+                "Hive",
+                "Termit mound",
+                "Borg collective"
+            ]
+        },
 
-            "rotation": {
-                "tables": ["rotation"],
-                "badges": [                
-                    "CCW",
-                    "Dreidel",
-                    "Quantum Entanglement"
-                ]
-            },
+        "keyboard": {
+            "tables": ["keyboard"],
+            "badges": [
+                "QWERTY",
+                "Colemak",
+                "Dvorak"
+            ]
+        },
 
-            "screen": {
-                "tables": ["screen"],
-                "badges": [               
-                    "E-Ink",
-                    "LCD",
-                    "Hologram"
-                ]
-            },
+        "processor": {
+            "tables": ["processor"],
+            "badges": [
+                "Celeron",
+                "IBM Watson",
+                "D-Wave"
+            ]
+        },
 
-            "telephony": {
-                "tables": [
-                    "telephony",
-                    "gsm",
-                    "gsm_neighbor",
-                    "cdma"
-                ]
-            },
+        "proximity": {
+            "tables": ["proximity"],
+            "badges": [
+                "Ion bond",
+                "Atom bond",
+                "Quark-gluon plasma"
+            ]
+        },
 
-            "temperature": {
-                "tables": ["temperature"],
-                "badges": [                
-                    "Hel",
-                    "Peltier",
-                    "Prometheus"
-                ]
-            },
+        "rotation": {
+            "tables": ["rotation"],
+            "badges": [
+                "CCW",
+                "Dreidel",
+                "Quantum Entanglement"
+            ]
+        },
 
-            "wifi": {
-                "tables": ["wifi"],
-                "badges": [                
-                    "Wave",
-                    "Flood",
-                    "Tsunami"
-                ]
-            }
+        "screen": {
+            "tables": ["screen"],
+            "badges": [
+                "E-Ink",
+                "LCD",
+                "Hologram"
+            ]
+        },
+
+        "telephony": {
+            "tables": [
+                "telephony",
+                "gsm",
+                "gsm_neighbor",
+                "cdma"
+            ]
+        },
+
+        "temperature": {
+            "tables": ["temperature"],
+            "badges": [
+                "Hel",
+                "Peltier",
+                "Prometheus"
+            ]
+        },
+
+        "wifi": {
+            "tables": ["wifi"],
+            "badges": [
+                "Wave",
+                "Flood",
+                "Tsunami"
+            ]
         }
     }
 }

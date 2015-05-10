@@ -1,5 +1,6 @@
 import json
 import jsoncomment
+import logging
 
 
 class ValidationError(Exception):
@@ -9,6 +10,7 @@ class ValidationError(Exception):
             for ks, msgs in v.items():
                 k = kp + '.' + ks
                 errs += ["{} for '{}'".format(m, k) for m in msgs]
+
         message = "Validation failed:\n\t{}".format("\n\t".join(errs))
         super(ValidationError, self).__init__(message)
 
@@ -33,8 +35,11 @@ class Config(object):
                     for opt in optional:
                         if opt not in v:
                             v[opt] = default[opt]
-        add_defaults(subconfig=self.__config['achievements']['regular'],
-                     optional=['thresholds', 'badges'])
+
+        add_defaults(subconfig=self.__config['achievements'],
+                     optional=['thresholds', 'badges', 'handlers'])
+        # Remove the default key.
+        del self.__config['achievements']['default']
 
     def validate(self):
         def validate(subconfig, validators):
@@ -46,16 +51,20 @@ class Config(object):
                     errors[k] = msgs
             return errors
         errors = {
-            'achievements.regular': validate(
-                subconfig=self.__config['achievements']['regular'],
+            'achievements': validate(
+                subconfig = self.__config['achievements'],
                 validators=[
                     (
                         lambda k, c: k == 'default' or ('tables' in c and c['tables']),
                         "At least one table should be defined"
                     ),
                     (
-                        lambda k, c: len(c['badges']) == len(c['thresholds']) + 1,
+                        lambda k, c: len(c['badges']) == len(c['thresholds']),
                         "Wrong quantity of thresholds defined for specified badges"
+                    ),
+                    (
+                        lambda k, c: 'handlers' in c and c['handlers'],
+                        "At least one handler should be defined"
                     )
                 ]
             )
@@ -63,6 +72,16 @@ class Config(object):
         errors = {k: v for k, v in errors.items() if v}
         if errors:
             raise ValidationError(errors)
+
+    def transform_achievements(self):
+        achievements = self.__config['achievements']
+        self.__config['achievements'] = {}
+        for a, c in achievements.items():
+            for name, handler in c['handlers'].items():
+                conf = c.copy()
+                del conf['handlers']
+                conf['handler'] = handler
+                self.__config['achievements'][a + "_" + name] = conf
 
     def __init__(self, config):
         self.__config = config
@@ -122,7 +141,10 @@ class Config(object):
 
 
 def load(path, fallback_path):
+    logging.debug("Loading config file: {}".format(path))
     config = Config.from_file(path, fallback_path)
     config.add_defaults()
     config.validate()
+    config.transform_achievements()
+    logging.debug("Config: {}".format(config))
     return config

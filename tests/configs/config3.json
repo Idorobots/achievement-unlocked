@@ -1,19 +1,17 @@
 {
     "achievements": {
-        "regular": {
-            "a": {
-                "tables": [],
-                "badges": ["A", "B", "C"]
-            },
-            "b": {
-                "tables": ["b1", "b2", "b3"],
-                "badges": ["a", "b", "c", "d"]
-            },
-            "c": {
-                "tables": ["c"],
-                "thresholds": []
-            },
-            "d": {}
-        }
+        "a": {
+            "tables": [],
+            "badges": ["A", "B", "C"]
+        },
+        "b": {
+            "tables": ["b1", "b2", "b3"],
+            "badges": ["a", "b", "c", "d"]
+        },
+        "c": {
+            "tables": ["c"],
+            "thresholds": []
+        },
+        "d": {}
     }
 }

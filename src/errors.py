@@ -1,7 +1,7 @@
 import abc
 
 
-class ApiError(metaclass=abc.ABCMeta):
+class AppError(Exception, metaclass=abc.ABCMeta):
     @abc.abstractproperty
     def http_code(self):
         pass
@@ -23,6 +23,10 @@ class ApiError(metaclass=abc.ABCMeta):
         }
 
 
+class ApiError(AppError):
+    pass
+
+
 class UnknownAchievementFilter(ApiError):
     def __init__(self, filter_by):
         self.__message = "unknown achievement filter: '{}'".format(filter_by)
@@ -33,7 +37,7 @@ class UnknownAchievementFilter(ApiError):
 
     @property
     def code(self):
-        return 1000
+        return "unknown_achievement_filter"
 
     @property
     def http_code(self):
@@ -50,8 +54,40 @@ class UnknownAchievementId(ApiError):
 
     @property
     def code(self):
-        return 1001
+        return "unknown_achievement_id"
 
     @property
     def http_code(self):
         return 404
+
+
+class InternalError(AppError):
+    @property
+    def http_code(self):
+        return 500
+
+    @property
+    def code(self):
+        return "internal_server_error"
+
+    @property
+    def message(self):
+        return "U dun goofed."
+
+class UnknownHandler(InternalError):
+    def __init__(self, handler):
+        self.__message = "unknown handler: '{}'".format(handler)
+
+    @property
+    def code(self):
+        return "unknown_handler"
+
+    @property
+    def message(self):
+        return self.__message
+
+
+def error(err):
+    assert isinstance(err, errors.ApiError)
+    bottle.response.status = err.http_code
+    return err.to_dict()
