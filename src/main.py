@@ -34,7 +34,16 @@ def rankig_by_id(achievement_id, db):
 # Users
 @bottle.get('/users/:device_id')
 def user_all(device_id, db):
-    pass
+    ranking = user_ranking(device_id, db)
+    if isinstance(ranking, errors.AppError):
+        return ranking.to_dict()
+
+    achievements = user_achievements(device_id, db)
+    if isinstance(achievements, errors.AppError):
+        return achivements.to_dict()
+
+    return {"ranking": ranking,
+            "achievements": achievements}
 
 
 @bottle.get('/users/:device_id/ranking')
