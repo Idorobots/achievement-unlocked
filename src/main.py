@@ -55,7 +55,7 @@ def user_all(device_id, db):
 
     achievements = user_achievements(device_id, db)
     if isinstance(achievements, errors.AppError):
-        return achivements.to_dict()
+        return achievements.to_dict()
 
     return {"ranking": ranking,
             "achievements": achievements}
