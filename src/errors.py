@@ -29,7 +29,7 @@ class ApiError(AppError):
 
 class UnknownAchievementFilter(ApiError):
     def __init__(self, filter_by):
-        self.__message = "unknown achievement filter: '{}'".format(filter_by)
+        self.__message = "Unknown achievement filter: '{}'.".format(filter_by)
 
     @property
     def message(self):
@@ -46,7 +46,7 @@ class UnknownAchievementFilter(ApiError):
 
 class UnknownAchievementId(ApiError):
     def __init__(self, achievement_id):
-        self.__message = "unknown achievement id: '{}'".format(achievement_id)
+        self.__message = "Unknown achievement id: '{}'.".format(achievement_id)
 
     @property
     def message(self):
@@ -74,9 +74,10 @@ class InternalError(AppError):
     def message(self):
         return "U dun goofed."
 
+
 class UnknownHandler(InternalError):
     def __init__(self, handler):
-        self.__message = "unknown handler: '{}'".format(handler)
+        self.__message = "Unknown handler: '{}'.".format(handler)
 
     @property
     def code(self):
@@ -85,9 +86,3 @@ class UnknownHandler(InternalError):
     @property
     def message(self):
         return self.__message
-
-
-def error(err):
-    assert isinstance(err, errors.ApiError)
-    bottle.response.status = err.http_code
-    return err.to_dict()

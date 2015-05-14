@@ -6,6 +6,7 @@ import filters
 import handlers
 import json
 import logging
+import middleware
 import os
 import sys
 import pymysql
@@ -14,95 +15,82 @@ import bottle_mysql
 
 global conf
 
+
 # App status
 @bottle.get('/status')
-def hello(db):
+def status(db):
     db.execute("SELECT 'running' AS 'status';")
     return db.fetchone()
 
 
 # Ranking
-@bottle.get('/ranking')
+@bottle.get('/ranking', apply=[middleware.intercept])
 def ranking_all(db):
-    try:
-        config = filters.filter(bottle.request.query.filter, conf.achievements)
-        return {a: handlers.dispatch_ranking(None, a, c, db) for a, c in config.items()} # FIXME Get rid of the None
-    except errors.AppError as e:
-        return e.to_dict()
+    config = filters.filter(bottle.request.query.filter, conf.achievements)
+    return {a: handlers.dispatch_ranking(None, a, c, db) for a, c in config.items()} # FIXME Get rid of the None
 
 
-@bottle.get('/ranking/:achievement_id')
-def rankig_by_id(achievement_id, db):
-    try:
-        config = conf.achievements.get(achievement_id)
-        if config == None:
-            raise errors.UnknownAchievementId(achievement_id)
+@bottle.get('/ranking/:achievement_id', apply=[middleware.intercept])
+def ranking_by_id(achievement_id, db):
+    config = conf.achievements.get(achievement_id)
+    if config is None:
+        raise errors.UnknownAchievementId(achievement_id)
+    # NOTE Can't return arrays to Bottle :(
+    bottle.response.content_type = "application/json"
+    return json.dumps(handlers.dispatch_ranking(None, achievement_id, config, db)) # FIXME Get rid of the None
 
-        # NOTE Can't return arrays to Bottle :(
-        bottle.response.content_type = "application/json"
-        return json.dumps(handlers.dispatch_ranking(None, achievement_id, config, db)) # FIXME Get rid of the None
 
-    except errors.AppError as e:
-        return e.to_dict()
+# Achievements
+@bottle.get('/achievements', apply=[middleware.intercept])
+def achievements_all(db):
+    pass
+
+
+@bottle.get('/achievements/:achievement_id', apply=[middleware.intercept])
+def achievements_by_id(achievement_id, db):
+    pass
 
 
 # Users
-@bottle.get('/users/:device_id')
+@bottle.get('/users/:device_id', apply=[middleware.intercept])
 def user_all(device_id, db):
     ranking = user_ranking(device_id, db)
-    if isinstance(ranking, errors.AppError):
-        return ranking.to_dict()
-
     achievements = user_achievements(device_id, db)
-    if isinstance(achievements, errors.AppError):
-        return achievements.to_dict()
-
     return {"ranking": ranking,
             "achievements": achievements}
 
 
-@bottle.get('/users/:device_id/ranking')
+@bottle.get('/users/:device_id/ranking', apply=[middleware.intercept])
 def user_ranking(device_id, db):
-    try:
-        config = filters.filter(bottle.request.query.filter, conf.achievements)
-        return {a: handlers.dispatch_user_ranking(device_id, a, c, db) for a, c in config.items()}
-    except errors.AppError as e:
-        return e.to_dict()
+    config = filters.filter(bottle.request.query.filter, conf.achievements)
+    return {a: handlers.dispatch_user_ranking(device_id, a, c, db) for a, c in config.items()}
 
 
-@bottle.get('/users/:device_id/ranking/:achievement_id')
+@bottle.get('/users/:device_id/ranking/:achievement_id', apply=[middleware.intercept])
 def user_ranking_by_id(device_id, achievement_id, db):
-    try:
-        config = conf.achievements.get(achievement_id)
-        if config == None:
-            raise errors.UnknownAchievementId(achievement_id)
-
-        return handlers.dispatch_user_ranking(device_id, achievement_id, config, db)
-
-    except errors.AppError as e:
-        return e.to_dict()
+    config = conf.achievements.get(achievement_id)
+    if config is None:
+        raise errors.UnknownAchievementId(achievement_id)
+    return handlers.dispatch_user_ranking(device_id, achievement_id, config, db)
 
 
-@bottle.get('/users/:device_id/achievements')
+@bottle.get('/users/:device_id/achievements', apply=[middleware.intercept])
 def user_achievements(device_id, db):
-    try:
-        config = filters.filter(bottle.request.query.filter, conf.achievements)
-        return {a: handlers.dispatch_achievement(device_id, a, c, db) for a, c in config.items()}
-    except errors.AppError as e:
-        return e.to_dict()
+    filter_by = bottle.request.query.filter
+    config = filters.filter(filter_by, conf.achievements)
+    if config is None:
+        raise errors.UnknownAchievementFilter(filter_by)
+    return {
+        a: handlers.dispatch_achievement(device_id, a, c, db) for a, c in config.items()
+    }
 
 
-@bottle.get('/users/:device_id/achievements/:achievement_id')
+@bottle.get('/users/:device_id/achievements/:achievement_id', apply=[middleware.intercept])
 def user_achievement_by_id(device_id, achievement_id, db):
-    try:
-        config = conf.achievements.get(achievement_id)
-        if config == None:
-            raise errors.UnknownAchievementId(achievement_id)
-
-        return handlers.dispatch_achievement(device_id, achievement_id, config, db)
-
-    except errors.AppError as e:
-        return e.to_dict()
+    config = conf.achievements.get(achievement_id)
+    if config is None:
+        raise errors.UnknownAchievementId(achievement_id)
+    return handlers.dispatch_achievement(device_id, achievement_id, config, db)
 
 
 # Misc
