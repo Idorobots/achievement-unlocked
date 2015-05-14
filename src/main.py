@@ -40,17 +40,6 @@ def ranking_by_id(achievement_id, db):
     return json.dumps(handlers.dispatch_ranking(None, achievement_id, config, db)) # FIXME Get rid of the None
 
 
-# Achievements
-@bottle.get('/achievements', apply=[middleware.intercept])
-def achievements_all(db):
-    pass
-
-
-@bottle.get('/achievements/:achievement_id', apply=[middleware.intercept])
-def achievements_by_id(achievement_id, db):
-    pass
-
-
 # Users
 @bottle.get('/users/:device_id', apply=[middleware.intercept])
 def user_all(device_id, db):
@@ -80,9 +69,7 @@ def user_achievements(device_id, db):
     config = filters.filter(filter_by, conf.achievements)
     if config is None:
         raise errors.UnknownAchievementFilter(filter_by)
-    return {
-        a: handlers.dispatch_achievement(device_id, a, c, db) for a, c in config.items()
-    }
+    return {a: handlers.dispatch_achievement(device_id, a, c, db) for a, c in config.items()}
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id', apply=[middleware.intercept])

@@ -3,75 +3,35 @@ import jsoncomment
 import logging
 
 
-class ValidationError(Exception):
-    def __init__(self, errors):
-        errs = []
-        for kp, v in errors.items():
-            for ks, msgs in v.items():
-                k = kp + '.' + ks
-                errs += ["{} for '{}'".format(m, k) for m in msgs]
-
-        message = "Validation failed:\n\t{}".format("\n\t".join(errs))
-        super(ValidationError, self).__init__(message)
-
-
 class Config(object):
     def __init_config_from_file(self, path):
         def add_dict(config, d):
             for k, v in d.items():
-                if k in config and isinstance(config[k], dict) and isinstance(v, dict):
-                    add_dict(config=config[k], d=v)
+                kv = config.get(k, None)
+                if isinstance(kv, dict) and isinstance(v, dict):
+                    add_dict(config=kv, d=v)
                 else:
                     config[k] = v
         with open(path) as f:
-            add_dict(config=self.__config,
-                     d=jsoncomment.JsonComment(json).loads(f.read()))
+            add_dict(config=self.__config, d=jsoncomment.JsonComment(json).loads(f.read()))
 
     def add_defaults(self):
-        def add_defaults(subconfig, optional, default_key='default'):
-            default = subconfig[default_key]
-            for k, v in subconfig.items():
-                if k != default_key:
-                    for opt in optional:
-                        if opt not in v:
-                            v[opt] = default[opt]
+        def add_defaults(subconfig, default):
+            for dk, dv in default.items():
+                v = subconfig.get(dk, None)
+                if v is None:
+                    subconfig[dk] = dv
+                elif isinstance(dv, dict) and isinstance(v, dict):
+                    add_defaults(subconfig=v, default=dv)
 
-        add_defaults(subconfig=self.__config['achievements'],
-                     optional=['thresholds', 'badges', 'handlers'])
-        # Remove the default key.
-        del self.__config['achievements']['default']
-
-    def validate(self):
-        def validate(subconfig, validators):
-            errors = {}
-            for k in subconfig.keys():
-                c = subconfig[k]
-                msgs = [m for v, m in validators if not v(k, c)]
-                if msgs:
-                    errors[k] = msgs
-            return errors
-        errors = {
-            'achievements': validate(
-                subconfig = self.__config['achievements'],
-                validators=[
-                    (
-                        lambda k, c: k == 'default' or ('tables' in c and c['tables']),
-                        "At least one table should be defined"
-                    ),
-                    (
-                        lambda k, c: len(c['badges']) == len(c['thresholds']),
-                        "Wrong quantity of thresholds defined for specified badges"
-                    ),
-                    (
-                        lambda k, c: 'handlers' in c and c['handlers'],
-                        "At least one handler should be defined"
-                    )
-                ]
-            )
-        }
-        errors = {k: v for k, v in errors.items() if v}
-        if errors:
-            raise ValidationError(errors)
+        achievements = self.__config['achievements']
+        default = achievements.pop('default')
+        for a in achievements.values():
+            tables = {'tables':  a.pop('tables')}
+            if 'no_defaults' not in a or not a['no_defaults']:
+                add_defaults(subconfig=a, default=default)
+            if 'count' in a:
+                add_defaults(subconfig=a['count'], default=tables)
 
     def transform_achievements(self):
         achievements = self.__config['achievements']
@@ -115,6 +75,9 @@ class Config(object):
     def __repr__(self):
         return self.__config.__repr__()
 
+    def __contains__(self, key):
+        return key in self.__config.keys()
+
     def items(self):
         return [(k, Config.sub_config(v)) for k, v in self.__config.items()]
 
@@ -144,7 +107,6 @@ def load(path, fallback_path):
     logging.debug("Loading config file: {}".format(path))
     config = Config.from_file(path, fallback_path)
     config.add_defaults()
-    config.validate()
     config.transform_achievements()
     logging.debug("Config: {}".format(config))
     return config

@@ -1,26 +1,29 @@
 {
     "achievements": {
         "default": {
-            "thresholds": [10000, 100000, 1000000],
-
-            "badges": [
-                "Babies first steps.",
-                "Keep up the good work!",
-                "We're gonna need MapReduce here..."
-            ],
+            "count": {
+                "thresholds": [10000, 100000, 1000000],               
+                "badges": [
+                    "Babies first steps.",
+                    "Keep up the good work!",
+                    "We're gonna need MapReduce here..."
+                ]
+            },
 
             "handlers" : {
                 "count": "count_based"
-            },
+            }
         },
 
         "accelerometer": {
             "tables": ["accelerometer"],
-            "badges": [
-                "Shake",
-                "Shake-shake",
-                "Shake your booty!"
-            ]
+            "count": {
+                "badges": [
+                    "Shake",
+                    "Shake-shake",
+                    "Shake your booty!"
+                ]
+            }
         },
 
         "applications": {
@@ -34,11 +37,13 @@
 
         "barometer": {
             "tables": ["barometer"],
-            "badges": [
-                "Pascal",
-                "Baribal",
-                "Hg-rid"
-            ]
+            "count": {
+                "badges": [
+                    "Pascal",
+                    "Baribal",
+                    "Hg-rid"
+                ]
+            }
         },
 
         "battery": {
@@ -47,20 +52,24 @@
                 "battery_discharges",
                 "battery_charges"
             ],
-            "badges": [
-                "Volt",
-                "Ampere",
-                "Tesla"
-            ]
+            "count": {
+                "badges": [
+                    "Volt",
+                    "Ampere",
+                    "Tesla"
+                ]
+            }
         },
 
         "bluetooth": {
             "tables": ["bluetooth"],
-            "badges": [
-                "Harald Blåtand Gormsen",
-                "Mieszko I",
-                "Charlemagne"
-            ]
+            "count": {
+                "badges": [
+                    "Harald Blåtand Gormsen",
+                    "Mieszko I",
+                    "Charlemagne"
+                ]
+            }
         },
 
         "communication": {
@@ -68,11 +77,13 @@
                 "calls",
                 "messages"
             ],
-            "badges": [
-                "Introvert",
-                "Extrovert",
-                "Hi Kim, it's Jack... Please respond..."
-            ]
+            "count": {
+                "badges": [
+                    "Introvert",
+                    "Extrovert",
+                    "Hi Kim, it's Jack... Please respond..."
+                ]
+            }
         },
 
         "esm": {
@@ -81,20 +92,24 @@
 
         "gravity": {
             "tables": ["gravity"],
-            "badges": [
-                "The Sun",
-                "Neutron star",
-                "Black hole"
-            ]
+            "count": {
+                "badges": [
+                    "The Sun",
+                    "Neutron star",
+                    "Black hole"
+                ]
+            }
         },
 
         "gyroscope": {
             "tables": ["gyroscope"],
-            "badges": [
-                "Drunk",
-                "Cat",
-                "Crane"
-            ]
+            "count": {
+                "badges": [
+                    "Drunk",
+                    "Cat",
+                    "Crane"
+                ]
+            }
         },
 
         "installations": {
@@ -103,38 +118,46 @@
 
         "light": {
             "tables": ["light"],
-            "badges": [
-                "Edison",
-                "Tesla",
-                "Lucifer"
-            ]
+            "count": {
+                "badges": [
+                    "Edison",
+                    "Tesla",
+                    "Lucifer"
+                ]
+            }
         },
 
         "linear_accelerometer": {
             "tables": ["linear_accelerometer"],
-            "badges": [
-                "Warp 1",
-                "Warp 2",
-                "Warp 3"
-            ]
+            "count": {
+                "badges": [
+                    "Warp 1",
+                    "Warp 2",
+                    "Warp 3"
+                ]
+            }
         },
 
         "locations": {
             "tables": ["locations"],
-            "badges": [
-                "Turist",
-                "Globetrotter",
-                "Omnipresent"
-            ]
+            "count": {
+                "badges": [
+                    "Turist",
+                    "Globetrotter",
+                    "Omnipresent"
+                ]
+            }
         },
 
         "magnetometer": {
             "tables": ["magnetometer"],
-            "badges": [
-                "Hematite",
-                "Magnetite",
-                "Neodymium"
-            ]
+            "count": {
+                "badges": [
+                    "Hematite",
+                    "Magnetite",
+                    "Neodymium"
+                ]
+            }
         },
 
         "mqtt": {
@@ -149,56 +172,68 @@
                 "network",
                 "network_traffic"
             ],
-            "badges": [
-                "Hive",
-                "Termit mound",
-                "Borg collective"
-            ]
+            "count": {
+                "badges": [
+                    "Hive",
+                    "Termit mound",
+                    "Borg collective"
+                ]
+            }
         },
 
         "keyboard": {
             "tables": ["keyboard"],
-            "badges": [
-                "QWERTY",
-                "Colemak",
-                "Dvorak"
-            ]
+            "count": {
+                "badges": [
+                    "QWERTY",
+                    "Colemak",
+                    "Dvorak"
+                ]
+            }
         },
 
         "processor": {
             "tables": ["processor"],
-            "badges": [
-                "Celeron",
-                "IBM Watson",
-                "D-Wave"
-            ]
+            "count": {
+                "badges": [
+                    "Celeron",
+                    "IBM Watson",
+                    "D-Wave"
+                ]
+            }
         },
 
         "proximity": {
             "tables": ["proximity"],
-            "badges": [
-                "Ion bond",
-                "Atom bond",
-                "Quark-gluon plasma"
-            ]
+            "count": {
+                "badges": [
+                    "Ion bond",
+                    "Atom bond",
+                    "Quark-gluon plasma"
+                ]
+            }
         },
 
         "rotation": {
             "tables": ["rotation"],
-            "badges": [
-                "CCW",
-                "Dreidel",
-                "Quantum Entanglement"
-            ]
+            "count": {
+                "badges": [
+                    "CCW",
+                    "Dreidel",
+                    "Quantum Entanglement"
+                ]
+            }
         },
 
         "screen": {
             "tables": ["screen"],
-            "badges": [
-                "E-Ink",
-                "LCD",
-                "Hologram"
-            ]
+            "count": {
+                "badges": [
+                    "E-Ink",
+                    "LCD",
+                    "Hologram"
+                ]
+            }
         },
 
         "telephony": {
@@ -212,20 +247,24 @@
 
         "temperature": {
             "tables": ["temperature"],
-            "badges": [
-                "Hel",
-                "Peltier",
-                "Prometheus"
-            ]
+            "count": {
+                "badges": [
+                    "Hel",
+                    "Peltier",
+                    "Prometheus"
+                ]
+            }
         },
 
         "wifi": {
             "tables": ["wifi"],
-            "badges": [
-                "Wave",
-                "Flood",
-                "Tsunami"
-            ]
+            "count": {
+                "badges": [
+                    "Wave",
+                    "Flood",
+                    "Tsunami"
+                ]
+            }
         }
     }
 }

@@ -1,9 +1,11 @@
 {
     "achievements": {
         "default": {
-            "thresholds": [10, 100],
-            "badges": ["a", "b", "c"],
-	    "handlers": {"x": "y"}
+            "count": {
+                "thresholds": [10, 100],
+                "badges": ["a", "b", "c"],
+            },
+	          "handlers": {"x": "y"}
         }
     }
 }
