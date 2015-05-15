@@ -1,9 +1,11 @@
+import easydict
 import logging
 import middleware
 
 
 @middleware.unsafe()
-def count_based_badge(device_id, achievement_id, config, db):
+def count_based_badge(achievement_id, config, db, params):
+    device_id = params.device_id
     logging.debug("count_based_badge @ {}/{}".format(device_id, achievement_id))
 
     template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
@@ -35,7 +37,8 @@ def count_based_badge(device_id, achievement_id, config, db):
 
 
 @middleware.unsafe()
-def count_based_place(device_id, achievement_id, config, db):
+def count_based_place(achievement_id, config, db, params):
+    device_id = params.device_id
     logging.debug("count_based_place @ {}/{}".format(device_id, achievement_id))
 
     def index_of(l, key):
@@ -45,10 +48,11 @@ def count_based_place(device_id, achievement_id, config, db):
                 return u
         return None
 
-    return index_of(count_based_ranking(None, achievement_id, config, db), device_id) # FIXME Get rid of the None.
+    return index_of(count_based_ranking(achievement_id, config, db, params), device_id)
+
 
 @middleware.unsafe()
-def count_based_ranking(_device_id, achievement_id, config, db):
+def count_based_ranking(achievement_id, config, db, params):
     logging.debug("count_based_ranking @ {}".format(achievement_id))
 
     def merge(x, y):
@@ -65,34 +69,38 @@ def count_based_ranking(_device_id, achievement_id, config, db):
         counts = {record["device_id"]: record["count"] for record in db.fetchall()} # Might need a cursor
         ranking = merge(ranking, counts)
 
-    keys = sorted(ranking, key = lambda k: ranking[k])
+    keys = sorted(ranking, key=lambda k: ranking[k])
     return [{"device_id": k, "count": ranking[k]} for k in keys]
 
 
 # Handler dispatch:
 @middleware.unsafe()
-def dispatch(handlers, device_id, achievement_id, config, db): # FIXME Remove all the duplication :(
-    return handlers[config.get("handler")](device_id, achievement_id, config, db)
+def dispatch(handlers, config, achievement_id, db, params={}):
+    return {k: handlers[h](achievement_id, c, db, easydict.EasyDict(params)) for k, (h, c) in config.items()}
+
+
+# Handler initialization
 
 achievement_handlers = {
     "count_based": count_based_badge
 }
 
-def dispatch_achievement(device_id, achievement_id, config, db):
-    return dispatch(achievement_handlers, device_id, achievement_id, config, db)
+ranking_handlers = {
+    "count_based": count_based_ranking
+}
 
+user_achievement_handlers = {
+    "count_based": count_based_badge
+}
 
 user_ranking_handlers = {
     "count_based": count_based_place
 }
 
-def dispatch_user_ranking(device_id, achievement_id, config, db):
-    return dispatch(user_ranking_handlers, device_id, achievement_id, config, db)
 
-
-ranking_handlers = {
-    "count_based": count_based_ranking
-}
-
-def dispatch_ranking(device_id, achievement_id, config, db):
-    return dispatch(ranking_handlers, device_id, achievement_id, config, db)
+handlers = easydict.EasyDict({})
+handlers.achievements = achievement_handlers
+handlers.ranking = ranking_handlers
+handlers.user = {}
+handlers.user.achievements = user_achievement_handlers
+handlers.user.ranking = user_ranking_handlers

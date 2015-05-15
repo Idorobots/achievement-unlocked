@@ -1,12 +1,16 @@
 import errors
-import middleware
+
 
 filters = {
-    "all": lambda x: True
+    "all": lambda c: True,
+    "count": lambda c: "count" in c
 }
 
+
 # Utils:
-@middleware.unsafe()
-def filter(f, config):
-    fun = filters[f or "all"]
-    return {a: c for (a, c) in config.items() if fun(a)}
+def filter(f):
+    try:
+        fun = filters[f or "all"]
+        return lambda config: {k: (h, config[k]) for k, h in config['handlers'].items() if fun(k)}
+    except KeyError:
+        raise errors.UnknownAchievementFilter(f)
