@@ -49,7 +49,7 @@ class Config(object):
     def __getitem__(self, key):
         try:
             v = functools.reduce(dict.__getitem__, key.split('.'), self.__config)
-            return Config.sub_config(v)
+            return Config.subconfig(v)
         except KeyError:
             raise KeyError(key)
 
@@ -66,7 +66,7 @@ class Config(object):
             return default
 
     def __getattr__(self, key):
-        return Config.sub_config(self.__config[key])
+        return Config.subconfig(self.__config[key])
 
     def __str__(self):
         return self.__config.__str__()
@@ -78,16 +78,16 @@ class Config(object):
         return key in self.__config.keys()
 
     def items(self):
-        return [(k, Config.sub_config(v)) for k, v in self.__config.items()]
+        return [(k, Config.subconfig(v)) for k, v in self.__config.items()]
 
     def keys(self):
         return self.__config.keys()
 
     def values(self):
-        return [Config.sub_config(v) for v in self.__config.values()]
+        return [Config.subconfig(v) for v in self.__config.values()]
 
     @staticmethod
-    def sub_config(value):
+    def subconfig(value):
         if isinstance(value, dict):
             return Config(value)
         else:

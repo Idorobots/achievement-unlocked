@@ -1,5 +1,5 @@
 import errors
-
+from config import Config
 
 filters = {
     "all": lambda c: True,
@@ -11,6 +11,6 @@ filters = {
 def filter(f, config):
     try:
         fun = filters[f or "all"]
-        return {a: c for a, c in config.items() if fun(c)}
+        return Config({a: c for a, c in config.items() if fun(c)})
     except KeyError:
         raise errors.UnknownAchievementFilter(f)
