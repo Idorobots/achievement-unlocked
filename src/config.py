@@ -1,3 +1,4 @@
+import functools
 import json
 import jsoncomment
 import logging
@@ -23,7 +24,6 @@ class Config(object):
                     subconfig[dk] = dv
                 elif isinstance(dv, dict) and isinstance(v, dict):
                     add_defaults(subconfig=v, default=dv)
-
         achievements = self.__config['achievements']
         default = achievements.pop('default')
         for a in achievements.values():
@@ -46,23 +46,22 @@ class Config(object):
     def __init__(self, config):
         self.__config = config
 
-    def __getitem__(self, path):
-        config = self.__config
-        keys = path.split('.')
+    def __getitem__(self, key):
         try:
-            for key in keys[:-1]:
-                value = config[key]
-                if isinstance(value, dict):
-                    config = value
-                else:
-                    raise KeyError
-            return Config.sub_config(config[keys[-1]])
+            v = functools.reduce(dict.__getitem__, key.split('.'), self.__config)
+            return Config.sub_config(v)
         except KeyError:
-            raise KeyError(path)
+            raise KeyError(key)
 
-    def get(self, path, default=None):
+    def get_or_raise(self, key, error):
         try:
-            return self.__getitem__(path)
+            return self.__getitem__(key)
+        except KeyError:
+            raise error
+
+    def get(self, key, default=None):
+        try:
+            return self.__getitem__(key)
         except KeyError:
             return default
 
