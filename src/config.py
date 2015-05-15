@@ -33,16 +33,6 @@ class Config(object):
             if 'count' in a:
                 add_defaults(subconfig=a['count'], default=tables)
 
-    def transform_achievements(self):
-        achievements = self.__config['achievements']
-        self.__config['achievements'] = {}
-        for a, c in achievements.items():
-            for name, handler in c['handlers'].items():
-                conf = c.copy()
-                del conf['handlers']
-                conf['handler'] = handler
-                self.__config['achievements'][a + "_" + name] = conf
-
     def __init__(self, config):
         self.__config = config
 
@@ -106,6 +96,5 @@ def load(path, fallback_path):
     logging.debug("Loading config file: {}".format(path))
     config = Config.from_file(path, fallback_path)
     config.add_defaults()
-    config.transform_achievements()
     logging.debug("Config: {}".format(config))
     return config

@@ -8,8 +8,6 @@ def count_based_badge(achievement_id, config, db, params):
     device_id = params.device_id
     logging.debug("count_based_badge @ {}/{}".format(device_id, achievement_id))
 
-    config = config.count  # FIXME
-
     template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
     sub_queries = [template.format(table=table) for table in config.tables]
     query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
@@ -57,8 +55,6 @@ def count_based_place(achievement_id, config, db, params):
 def count_based_ranking(achievement_id, config, db, params):
     logging.debug("count_based_ranking @ {}".format(achievement_id))
 
-    config = config.count  # FIXME
-
     def merge(x, y):
         for (k, v) in y.items():
             if k in x:
@@ -79,8 +75,8 @@ def count_based_ranking(achievement_id, config, db, params):
 
 # Handler dispatch:
 @middleware.unsafe()
-def dispatch(handlers, achievement_id, config, db, params={}):
-    return handlers[config.get("handler")](achievement_id, config, db, easydict.EasyDict(params))
+def dispatch(handlers, config, achievement_id, db, params={}):
+    return {k: handlers[h](achievement_id, c, db, easydict.EasyDict(params)) for k, (h, c) in config.items()}
 
 
 # Handler initialization

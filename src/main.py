@@ -27,23 +27,22 @@ def status(db):
 # Ranking
 @bottle.get('/ranking', apply=[middleware.intercept])
 def ranking_all(db):
-    config = filters.filter(bottle.request.query.filter, conf.achievements)
+    f = filters.filter(bottle.request.query.filter)
     return {a: handlers.dispatch(handlers=handlers.handlers.ranking,
+                                 config=f(c),
                                  achievement_id=a,
-                                 config=c,
-                                 db=db) for a, c in config.items()}
+                                 db=db) for a, c in conf.achievements.items()}
 
 
 @bottle.get('/ranking/:achievement_id', apply=[middleware.intercept])
 def ranking_by_id(achievement_id, db):
-    config = conf.achievements.get_or_raise(key=achievement_id,
-                                            error=errors.UnknownAchievementId(achievement_id))
-    # NOTE Can't return arrays to Bottle :(
-    bottle.response.content_type = "application/json"
-    return json.dumps(handlers.dispatch(handlers=handlers.handlers.ranking,
-                                        achievement_id=achievement_id,
-                                        config=config,
-                                        db=db))
+    f = filters.filter(bottle.request.query.filter)
+    c = conf.achievements.get_or_raise(key=achievement_id,
+                                       error=errors.UnknownAchievementId(achievement_id))
+    return handlers.dispatch(handlers=handlers.handlers.ranking,
+                             config=f(c),
+                             achievement_id=achievement_id,
+                             db=db)
 
 
 # Achievements
@@ -68,42 +67,44 @@ def user_all(device_id, db):
 
 @bottle.get('/users/:device_id/ranking', apply=[middleware.intercept])
 def user_ranking(device_id, db):
-    config = filters.filter(bottle.request.query.filter, conf.achievements)
+    f = filters.filter(bottle.request.query.filter)
     return {a: handlers.dispatch(handlers=handlers.handlers.user.ranking,
+                                 config=f(c),
                                  achievement_id=a,
-                                 config=c,
                                  db=db,
-                                 params={'device_id': device_id}) for a, c in config.items()}
+                                 params={'device_id': device_id}) for a, c in conf.achievements.items()}
 
 
 @bottle.get('/users/:device_id/ranking/:achievement_id', apply=[middleware.intercept])
 def user_ranking_by_id(device_id, achievement_id, db):
-    config = conf.achievements.get_or_raise(key=achievement_id,
-                                            error=errors.UnknownAchievementId(achievement_id))
+    f = filters.filter(bottle.request.query.filter)
+    c = conf.achievements.get_or_raise(key=achievement_id,
+                                       error=errors.UnknownAchievementId(achievement_id))
     return handlers.dispatch(handlers=handlers.handlers.user.ranking,
+                             config=f(c),
                              achievement_id=achievement_id,
-                             config=config,
                              db=db,
                              params={'device_id': device_id})
 
 
 @bottle.get('/users/:device_id/achievements', apply=[middleware.intercept])
 def user_achievements(device_id, db):
-    config = filters.filter(bottle.request.query.filter, conf.achievements)
+    f = filters.filter(bottle.request.query.filter)
     return {a: handlers.dispatch(handlers=handlers.handlers.user.achievements,
+                                 config=f(c),
                                  achievement_id=a,
-                                 config=c,
                                  db=db,
-                                 params={'device_id': device_id}) for a, c in config.items()}
+                                 params={'device_id': device_id}) for a, c in conf.achievements.items()}
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id', apply=[middleware.intercept])
 def user_achievement_by_id(device_id, achievement_id, db):
-    config = conf.achievements.get_or_raise(key=achievement_id,
-                                            error=errors.UnknownAchievementId(achievement_id))
+    f = filters.filter(bottle.request.query.filter)
+    c = conf.achievements.get_or_raise(key=achievement_id,
+                                       error=errors.UnknownAchievementId(achievement_id))
     return handlers.dispatch(handlers=handlers.handlers.user.achievements,
+                             config=f(c),
                              achievement_id=achievement_id,
-                             config=config,
                              db=db,
                              params={'device_id': device_id})
 
