@@ -1,4 +1,4 @@
-import middleware
+import errors
 
 
 filters = {
@@ -8,7 +8,9 @@ filters = {
 
 
 # Utils:
-@middleware.unsafe()
 def filter(f, config):
-    fun = filters[f or "all"]
-    return {a: c for a, c in config.items() if fun(c)}
+    try:
+        fun = filters[f or "all"]
+        return {a: c for a, c in config.items() if fun(c)}
+    except KeyError:
+        raise errors.UnknownAchievementFilter(f)

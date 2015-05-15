@@ -79,12 +79,21 @@ def count_based_ranking(_device_id, achievement_id, config, db):
 def dispatch(handlers, device_id, achievement_id, config, db): # FIXME Remove all the duplication :(
     return handlers[config.get("handler")](device_id, achievement_id, config, db)
 
+user_achievement_handlers = {
+    "count_based": count_based_badge
+}
+
+
+def dispatch_user_achievement(device_id, achievement_id, config, db):
+    return dispatch(achievement_handlers, device_id, achievement_id, config, db)
+
+
 achievement_handlers = {
     "count_based": count_based_badge
 }
 
 
-def dispatch_achievement(device_id, achievement_id, config, db):
+def dispatch_achievement(achievement_id, config, db):
     return dispatch(achievement_handlers, device_id, achievement_id, config, db)
 
 

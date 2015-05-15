@@ -32,12 +32,22 @@ def ranking_all(db):
 
 @bottle.get('/ranking/:achievement_id', apply=[middleware.intercept])
 def ranking_by_id(achievement_id, db):
-    config = conf.achievements.get(achievement_id)
-    if config is None:
-        raise errors.UnknownAchievementId(achievement_id)
+    config = conf.achievements.get_or_raise(key=achievement_id,
+                                            error=errors.UnknownAchievementId(achievement_id))
     # NOTE Can't return arrays to Bottle :(
     bottle.response.content_type = "application/json"
     return json.dumps(handlers.dispatch_ranking(None, achievement_id, config, db)) # FIXME Get rid of the None
+
+
+# Achievements
+@bottle.get('/achievements', apply=[middleware.intercept])
+def achievements_all(db):
+    pass
+
+
+@bottle.get('/achievements/:achievement_id', apply=[middleware.intercept])
+def achievements_by_id(achievement_id, db):
+    pass
 
 
 # Users
@@ -57,27 +67,22 @@ def user_ranking(device_id, db):
 
 @bottle.get('/users/:device_id/ranking/:achievement_id', apply=[middleware.intercept])
 def user_ranking_by_id(device_id, achievement_id, db):
-    config = conf.achievements.get(achievement_id)
-    if config is None:
-        raise errors.UnknownAchievementId(achievement_id)
+    config = conf.achievements.get_or_raise(key=achievement_id,
+                                            error=errors.UnknownAchievementId(achievement_id))
     return handlers.dispatch_user_ranking(device_id, achievement_id, config, db)
 
 
 @bottle.get('/users/:device_id/achievements', apply=[middleware.intercept])
 def user_achievements(device_id, db):
-    filter_by = bottle.request.query.filter
-    config = filters.filter(filter_by, conf.achievements)
-    if config is None:
-        raise errors.UnknownAchievementFilter(filter_by)
-    return {a: handlers.dispatch_achievement(device_id, a, c, db) for a, c in config.items()}
+    config = filters.filter(bottle.request.query.filter, conf.achievements)
+    return {a: handlers.dispatch_user_achievement(device_id, a, c, db) for a, c in config.items()}
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id', apply=[middleware.intercept])
 def user_achievement_by_id(device_id, achievement_id, db):
-    config = conf.achievements.get(achievement_id)
-    if config is None:
-        raise errors.UnknownAchievementId(achievement_id)
-    return handlers.dispatch_achievement(device_id, achievement_id, config, db)
+    config = conf.achievements.get_or_raise(key=achievement_id,
+                                            error=errors.UnknownAchievementId(achievement_id))
+    return handlers.dispatch_user_achievement(device_id, achievement_id, config, db)
 
 
 # Misc
