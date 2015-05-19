@@ -1,6 +1,8 @@
+from db import execute
 import easydict
 import logging
 import middleware
+import time
 
 
 @middleware.unsafe()
@@ -12,7 +14,7 @@ def count_based_badge(achievement_id, config, db, params):
     sub_queries = [template.format(table=table) for table in config.tables]
     query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
 
-    db.execute(query, {'device_id': device_id})
+    execute(db, query, {'device_id': device_id})
 
     count = db.fetchone()['result']
     thresholds = config.thresholds
@@ -63,14 +65,23 @@ def count_based_ranking(achievement_id, config, db, params):
                 x[k] = v
         return x
 
+    query = ("SELECT device_id, count(*) AS 'count' FROM {} "
+             "WHERE timestamp >= %(from)s AND timestamp <= %(to)s "
+             "GROUP BY device_id;")
+
     ranking = {}
     for table in config.tables:
-        db.execute("SELECT device_id, count(*) AS 'count' FROM {} GROUP BY device_id;".format(table))
+        execute(db, query.format(table), build_time_range(params["from"], params["to"]))
         counts = {record["device_id"]: record["count"] for record in db.fetchall()} # Might need a cursor
         ranking = merge(ranking, counts)
 
     keys = sorted(ranking, key=lambda k: ranking[k])
     return [{"device_id": k, "count": ranking[k]} for k in keys]
+
+
+def build_time_range(frm, to):
+    return {"from": frm or "0",
+            "to": to or str(int(time.time()) * 1000)} # NOTE Aware stores timestamps in unixtime millis
 
 
 # Handler dispatch:

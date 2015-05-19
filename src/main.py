@@ -31,7 +31,10 @@ def ranking_all(db):
     return {a: handlers.dispatch(handlers=handlers.handlers.ranking,
                                  config=f(c),
                                  achievement_id=a,
-                                 db=db) for a, c in conf.achievements.items()}
+                                 db=db,
+                                 params={'from': bottle.request.query.get("from"),
+                                         'to': bottle.request.query.to})
+            for a, c in conf.achievements.items()}
 
 
 @bottle.get('/ranking/:achievement_id', apply=[middleware.intercept])
@@ -42,7 +45,9 @@ def ranking_by_id(achievement_id, db):
     return handlers.dispatch(handlers=handlers.handlers.ranking,
                              config=f(c),
                              achievement_id=achievement_id,
-                             db=db)
+                             db=db,
+                             params={'from': bottle.request.query.get("from"),
+                                     'to': bottle.request.query.to})
 
 
 # Achievements
@@ -72,7 +77,10 @@ def user_ranking(device_id, db):
                                  config=f(c),
                                  achievement_id=a,
                                  db=db,
-                                 params={'device_id': device_id}) for a, c in conf.achievements.items()}
+                                 params={'device_id': device_id,
+                                         'from': bottle.request.query.get("from"),
+                                         'to': bottle.request.query.to})
+            for a, c in conf.achievements.items()}
 
 
 @bottle.get('/users/:device_id/ranking/:achievement_id', apply=[middleware.intercept])
@@ -84,7 +92,9 @@ def user_ranking_by_id(device_id, achievement_id, db):
                              config=f(c),
                              achievement_id=achievement_id,
                              db=db,
-                             params={'device_id': device_id})
+                             params={'device_id': device_id,
+                                     'from': bottle.request.query.get("from"),
+                                     'to': bottle.request.query.to})
 
 
 @bottle.get('/users/:device_id/achievements', apply=[middleware.intercept])
@@ -94,7 +104,8 @@ def user_achievements(device_id, db):
                                  config=f(c),
                                  achievement_id=a,
                                  db=db,
-                                 params={'device_id': device_id}) for a, c in conf.achievements.items()}
+                                 params={'device_id': device_id})
+            for a, c in conf.achievements.items()}
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id', apply=[middleware.intercept])
