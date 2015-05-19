@@ -1,3 +1,4 @@
+import copy
 import functools
 import json
 import jsoncomment
@@ -21,7 +22,7 @@ class Config(object):
             for dk, dv in default.items():
                 v = subconfig.get(dk, None)
                 if v is None:
-                    subconfig[dk] = dv
+                    subconfig[dk] = copy.copy(dv)
                 elif isinstance(dv, dict) and isinstance(v, dict):
                     add_defaults(subconfig=v, default=dv)
         achievements = self.__config['achievements']
