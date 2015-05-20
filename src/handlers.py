@@ -6,16 +6,26 @@ import time
 
 @middleware.unsafe()
 def count_based_badge(achievement_id, config, db, params):
-    device_id = params.device_id
-    logging.debug("count_based_badge @ {}/{}".format(device_id, achievement_id))
+    logging.debug("count_based_badge @ {}/{}".format(params.device_id, achievement_id))
+    query = get_count_query(config.tables, "%(device_id)s") + ";"
+    return query_based_badge(query, config, db, params)
 
-    template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
-    sub_queries = [template.format(table=table) for table in config.tables]
-    query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
 
-    db.execute(query, {'device_id': device_id})
+@middleware.unsafe()
+def proc_based_badge(achievement_id, config, db, params):
+    logging.debug("proc_based_badge @ {}/{}".format(params.device_id, achievement_id))
+    nominator = get_count_query(config.tables, "%(device_id)s")
+    denominator = get_count_query(config.tables, None)
+    # Achievement unlocked: Triple nested SELECT
+    query = "SELECT {} / {} AS 'result';".format(nominator, denominator)
+    return query_based_badge(query, config, db, params)
 
+
+# Generic *_based_badge handler.
+def query_based_badge(query, config, db, params):
+    db.execute(query, {'device_id': params.device_id})
     count = db.fetchone()['result']
+
     thresholds = config.thresholds
     badges = config.badges
 
@@ -33,29 +43,63 @@ def count_based_badge(achievement_id, config, db, params):
         next_badge_at = None
 
     return {"badge": badge,
-            "count": count,
+            "value": count,
             "next_badge_at": next_badge_at}
+
+
+def get_count_query(tables, device_id):
+    template = "SELECT count(*) FROM {table}"
+
+    if device_id:
+        template = template + " WHERE device_id = {}".format(device_id);
+
+    sub_queries = ["(" + template.format(table=table) + ")" for table in tables]
+    return "(SELECT " + " + ".join(sub_queries) + " AS 'result')"
 
 
 @middleware.unsafe()
 def count_based_place(achievement_id, config, db, params):
     device_id = params.device_id
     logging.debug("count_based_place @ {}/{}".format(device_id, achievement_id))
-
-    def index_of(l, key):
-        for i, u in enumerate(l):
-            if u["device_id"] == key:
-                u["rank"] = i
-                return u
-        return None
-
     return index_of(count_based_ranking(achievement_id, config, db, params), device_id)
+
+
+@middleware.unsafe()
+def proc_based_place(achievement_id, config, db, params):
+    device_id = params.device_id
+    logging.debug("proc_based_place @ {}/{}".format(device_id, achievement_id))
+    return index_of(proc_based_ranking(achievement_id, config, db, params), device_id)
+
+
+def index_of(l, key):
+    for i, u in enumerate(l):
+        if u["device_id"] == key:
+            u["rank"] = i
+            return u
+    return None
 
 
 @middleware.unsafe()
 def count_based_ranking(achievement_id, config, db, params):
     logging.debug("count_based_ranking @ {}".format(achievement_id))
+    return get_counts(db, config.tables, params)
 
+
+@middleware.unsafe()
+def proc_based_ranking(achievement_id, config, db, params):
+    logging.debug("count_based_ranking @ {}".format(achievement_id))
+    counts = get_counts(db, config.tables, params)
+    sum = 0
+    for c in counts:
+        sum += c["value"]
+
+    for c in counts:
+        c["value"] = c["value"] / sum
+
+    return counts
+
+
+def get_counts(db, tables, params):
     def merge(x, y):
         for (k, v) in y.items():
             if k in x:
@@ -64,18 +108,18 @@ def count_based_ranking(achievement_id, config, db, params):
                 x[k] = v
         return x
 
-    query = ("SELECT device_id, count(*) AS 'count' FROM {} "
+    query = ("SELECT device_id, count(*) AS 'value' FROM {} "
              "WHERE timestamp >= %(from)s AND timestamp <= %(to)s "
              "GROUP BY device_id;")
 
     ranking = {}
-    for table in config.tables:
+    for table in tables:
         db.execute(query.format(table), build_time_range(params["from"], params["to"]))
-        counts = {record["device_id"]: record["count"] for record in db.fetchall()} # Might need a cursor
+        counts = {record["device_id"]: record["value"] for record in db.fetchall()} # Might need a cursor
         ranking = merge(ranking, counts)
 
     keys = sorted(ranking, key=lambda k: ranking[k])
-    return [{"device_id": k, "count": ranking[k]} for k in keys]
+    return [{"device_id": k, "value": ranking[k]} for k in keys]
 
 
 def build_time_range(frm, to):
@@ -92,19 +136,23 @@ def dispatch(handlers, config, achievement_id, db, params={}):
 # Handler initialization
 
 achievement_handlers = {
-    "count_based": count_based_badge
+    "count_based": count_based_badge,
+    "procent_based": proc_based_badge
 }
 
 ranking_handlers = {
-    "count_based": count_based_ranking
+    "count_based": count_based_ranking,
+    "procent_based": proc_based_ranking
 }
 
 user_achievement_handlers = {
-    "count_based": count_based_badge
+    "count_based": count_based_badge,
+    "procent_based": proc_based_badge
 }
 
 user_ranking_handlers = {
-    "count_based": count_based_place
+    "count_based": count_based_place,
+    "procent_based": proc_based_place
 }
 
 

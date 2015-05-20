@@ -3,7 +3,8 @@ import errors
 
 filters = {
     "all": lambda c: True,
-    "count": lambda c: "count" in c
+    "count": lambda c: "count" in c,
+    "procent": lambda c: "procent" in c
 }
 
 

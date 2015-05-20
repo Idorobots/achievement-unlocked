@@ -33,6 +33,8 @@ class Config(object):
                 add_defaults(subconfig=a, default=default)
             if 'count' in a:
                 add_defaults(subconfig=a['count'], default=tables)
+            if 'procent' in a:
+                add_defaults(subconfig=a['procent'], default=tables)
 
     def __init__(self, config):
         self.__config = config

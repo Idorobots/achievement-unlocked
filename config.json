@@ -10,8 +10,18 @@
                 ]
             },
 
+            "procent": {
+                "thresholds": [0.01, 0.1, 0.5],
+                "badges": [
+                    "Ghost",
+                    "Active",
+                    "Dominator"
+                ]
+            },
+
             "handlers" : {
-                "count": "count_based"
+                "count": "count_based",
+                "procent": "procent_based"
             }
         },
 
