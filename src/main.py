@@ -1,6 +1,7 @@
 import argparse
 import bottle
 import config
+import db
 import errors
 import filters
 import handlers
@@ -9,9 +10,6 @@ import logging
 import middleware
 import os
 import sys
-import pymysql
-pymysql.install_as_MySQLdb() # Hax for python2 compatibility.
-import bottle_mysql
 
 
 global conf
@@ -31,7 +29,10 @@ def ranking_all(db):
     return {a: handlers.dispatch(handlers=handlers.handlers.ranking,
                                  config=f(c),
                                  achievement_id=a,
-                                 db=db) for a, c in conf.achievements.items()}
+                                 db=db,
+                                 params={'from': bottle.request.query.get("from"),
+                                         'to': bottle.request.query.to})
+            for a, c in conf.achievements.items()}
 
 
 @bottle.get('/ranking/:achievement_id', apply=[middleware.intercept])
@@ -42,7 +43,9 @@ def ranking_by_id(achievement_id, db):
     return handlers.dispatch(handlers=handlers.handlers.ranking,
                              config=f(c),
                              achievement_id=achievement_id,
-                             db=db)
+                             db=db,
+                             params={'from': bottle.request.query.get("from"),
+                                     'to': bottle.request.query.to})
 
 
 # Achievements
@@ -72,7 +75,10 @@ def user_ranking(device_id, db):
                                  config=f(c),
                                  achievement_id=a,
                                  db=db,
-                                 params={'device_id': device_id}) for a, c in conf.achievements.items()}
+                                 params={'device_id': device_id,
+                                         'from': bottle.request.query.get("from"),
+                                         'to': bottle.request.query.to})
+            for a, c in conf.achievements.items()}
 
 
 @bottle.get('/users/:device_id/ranking/:achievement_id', apply=[middleware.intercept])
@@ -84,7 +90,9 @@ def user_ranking_by_id(device_id, achievement_id, db):
                              config=f(c),
                              achievement_id=achievement_id,
                              db=db,
-                             params={'device_id': device_id})
+                             params={'device_id': device_id,
+                                     'from': bottle.request.query.get("from"),
+                                     'to': bottle.request.query.to})
 
 
 @bottle.get('/users/:device_id/achievements', apply=[middleware.intercept])
@@ -94,7 +102,8 @@ def user_achievements(device_id, db):
                                  config=f(c),
                                  achievement_id=a,
                                  db=db,
-                                 params={'device_id': device_id}) for a, c in conf.achievements.items()}
+                                 params={'device_id': device_id})
+            for a, c in conf.achievements.items()}
 
 
 @bottle.get('/users/:device_id/achievements/:achievement_id', apply=[middleware.intercept])
@@ -134,11 +143,11 @@ if __name__ == "__main__":
     # DB setup:
     app = bottle.default_app()
     app.catchall = True
-    plugin = bottle_mysql.Plugin(dbhost=conf.get('db.host', "localhost"),
-                                 dbport=conf.get('db.port', 3306),
-                                 dbname=conf.get('db.name', "aware"),
-                                 dbuser=conf.get('db.user', "achievement"),
-                                 dbpass=conf.get('db.pass'))
+    plugin = db.Plugin(dbhost=conf.get('db.host', "localhost"),
+                       dbport=conf.get('db.port', 3306),
+                       dbname=conf.get('db.name', "aware"),
+                       dbuser=conf.get('db.user', "achievement"),
+                       dbpass=conf.get('db.pass'))
     app.install(plugin)
 
     host = conf.get('app.host', "0.0.0.0")
