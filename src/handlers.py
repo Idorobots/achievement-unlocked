@@ -6,16 +6,26 @@ import time
 
 @middleware.unsafe()
 def count_based_badge(achievement_id, config, db, params):
-    device_id = params.device_id
-    logging.debug("count_based_badge @ {}/{}".format(device_id, achievement_id))
+    logging.debug("count_based_badge @ {}/{}".format(params.device_id, achievement_id))
+    query = get_count_query(config.tables, "%(device_id)s") + ";"
+    return query_based_badge(query, config, db, params)
 
-    template = "(SELECT count(*) FROM {table} WHERE device_id=%(device_id)s)"
-    sub_queries = [template.format(table=table) for table in config.tables]
-    query = "SELECT " + " + ".join(sub_queries) + " AS 'result';"
 
-    db.execute(query, {'device_id': device_id})
+@middleware.unsafe()
+def proc_based_badge(achievement_id, config, db, params):
+    logging.debug("proc_based_badge @ {}/{}".format(params.device_id, achievement_id))
+    nominator = get_count_query(config.tables, "%(device_id)s")
+    denominator = get_count_query(config.tables, None)
+    # Achievement unlocked: Triple nested SELECT
+    query = "SELECT {} / {} AS 'result';".format(nominator, denominator)
+    return query_based_badge(query, config, db, params)
 
+
+# Generic *_based_badge handler.
+def query_based_badge(query, config, db, params):
+    db.execute(query, {'device_id': params.device_id})
     count = db.fetchone()['result']
+
     thresholds = config.thresholds
     badges = config.badges
 
@@ -33,8 +43,18 @@ def count_based_badge(achievement_id, config, db, params):
         next_badge_at = None
 
     return {"badge": badge,
-            "count": count,
+            "value": count,
             "next_badge_at": next_badge_at}
+
+
+def get_count_query(tables, device_id):
+    template = "SELECT count(*) FROM {table}"
+
+    if device_id:
+        template = template + " WHERE device_id = {}".format(device_id);
+
+    sub_queries = ["(" + template.format(table=table) + ")" for table in tables]
+    return "(SELECT " + " + ".join(sub_queries) + " AS 'result')"
 
 
 @middleware.unsafe()
@@ -92,7 +112,8 @@ def dispatch(handlers, config, achievement_id, db, params={}):
 # Handler initialization
 
 achievement_handlers = {
-    "count_based": count_based_badge
+    "count_based": count_based_badge,
+    "procent_based": proc_based_badge
 }
 
 ranking_handlers = {
@@ -100,7 +121,8 @@ ranking_handlers = {
 }
 
 user_achievement_handlers = {
-    "count_based": count_based_badge
+    "count_based": count_based_badge,
+    "procent_based": proc_based_badge
 }
 
 user_ranking_handlers = {
