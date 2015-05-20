@@ -1,6 +1,7 @@
 import argparse
 import bottle
 import config
+import db
 import errors
 import filters
 import handlers
@@ -9,9 +10,6 @@ import logging
 import middleware
 import os
 import sys
-import pymysql
-pymysql.install_as_MySQLdb() # Hax for python2 compatibility.
-import bottle_mysql
 
 
 global conf
@@ -145,11 +143,11 @@ if __name__ == "__main__":
     # DB setup:
     app = bottle.default_app()
     app.catchall = True
-    plugin = bottle_mysql.Plugin(dbhost=conf.get('db.host', "localhost"),
-                                 dbport=conf.get('db.port', 3306),
-                                 dbname=conf.get('db.name', "aware"),
-                                 dbuser=conf.get('db.user', "achievement"),
-                                 dbpass=conf.get('db.pass'))
+    plugin = db.Plugin(dbhost=conf.get('db.host', "localhost"),
+                       dbport=conf.get('db.port', 3306),
+                       dbname=conf.get('db.name', "aware"),
+                       dbuser=conf.get('db.user', "achievement"),
+                       dbpass=conf.get('db.pass'))
     app.install(plugin)
 
     host = conf.get('app.host', "0.0.0.0")
