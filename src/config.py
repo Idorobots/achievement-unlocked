@@ -1,8 +1,10 @@
 import copy
+import datetime
 import functools
 import json
 import jsoncomment
 import logging
+import re
 
 
 class Config(object):
@@ -25,6 +27,21 @@ class Config(object):
                     subconfig[dk] = copy.copy(dv)
                 elif isinstance(dv, dict) and isinstance(v, dict):
                     add_defaults(subconfig=v, default=dv)
+
+        def time_threshold(threshold):
+            hours_p = re.compile("^(\d+)\s*h\s*$", re.IGNORECASE)
+            days_p = re.compile("^(\d+)\s*d\s*$", re.IGNORECASE)
+            weaks_p = re.compile("^(\d+)\s*w\s*$", re.IGNORECASE)
+            p = hours_p.match(threshold)
+            if p:
+                return datetime.timedelta(hours=int(p.group(1)))
+            p = days_p.match(threshold)
+            if p:
+                return datetime.timedelta(days=int(p.group(1)))
+            p = weaks_p.match(threshold)
+            if p:
+                return datetime.timedelta(weeks=int(p.group(1)))
+            raise Exception("Unknown threshold type in '{}'".format(threshold))
         achievements = self.__config['achievements']
         default = achievements.pop('default')
         for a in achievements.values():
@@ -35,6 +52,9 @@ class Config(object):
                 add_defaults(subconfig=a['count'], default=tables)
             if 'procent' in a:
                 add_defaults(subconfig=a['procent'], default=tables)
+            if 'time' in a:
+                add_defaults(subconfig=a['time'], default=tables)
+            a['time']['thresholds'] = [time_threshold(t) for t in a['time']['thresholds']]
 
     def __init__(self, config):
         self.__config = config

@@ -19,9 +19,19 @@
                 ]
             },
 
+            "time": {
+                "thresholds": ["72h", "90d", "53w"],
+                "badges": [
+                    "Fish",
+                    "Initiate",
+                    "Veteran"
+                ]
+            },
+
             "handlers" : {
                 "count": "count_based",
-                "procent": "procent_based"
+                "procent": "procent_based",
+                "time": "time_based"
             }
         },
 
