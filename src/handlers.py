@@ -164,7 +164,7 @@ def get_counts(db, tables, params):
         counts = {record["device_id"]: record["value"] for record in db.fetchall()} # Might need a cursor
         ranking = merge(ranking, counts)
 
-    keys = sorted(ranking, key=lambda k: ranking[k])
+    keys = sorted(ranking, key=lambda k: ranking[k], reverse=True)
     return [{"device_id": k, "value": ranking[k]} for k in keys]
 
 
