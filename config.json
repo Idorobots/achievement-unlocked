@@ -20,7 +20,7 @@
             },
 
             "time": {
-                "thresholds": ["72h", "30d", "483d"],
+                "thresholds": ["72h", "90d", "53w"],
                 "badges": [
                     "Fish",
                     "Initiate",
