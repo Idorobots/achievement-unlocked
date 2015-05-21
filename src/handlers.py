@@ -62,7 +62,7 @@ def get_count_query(tables, device_id):
 def time_based_badge(achievement_id, config, db, params):
     logging.debug("time_based_badge @ {}/{}".format(params.device_id, achievement_id))
 
-    query = get_timestamp_query(config.tables, "%(device_id)s") + ";"
+    query = get_time_query(config.tables, "%(device_id)s") + ";"
     db.execute(query, {'device_id': params.device_id})
     timestamp = db.fetchone()['timestamp'] / 1000  # It's a kind of magic
     now = datetime.datetime.now()  # TODO now() or utcnow()
@@ -86,14 +86,14 @@ def time_based_badge(achievement_id, config, db, params):
             "next_badge_at": next_badge_at}
 
 
-def get_timestamp_query(tables, device_id):
+def get_time_query(tables, device_id):
     template = "SELECT timestamp FROM {table}"
     if device_id:
-        template = template + " WHERE device_id = {}".format(device_id)
+        template = template + " WHERE device_id={}".format(device_id)
     template = template + " ORDER BY timestamp ASC LIMIT 1"
-
     sub_queries = ["(" + template.format(table=table) + ")" for table in tables]
-    return " UNION ALL ".join(sub_queries) + " ORDER BY timestamp ASC LIMIT 1"
+
+    return "SELECT min(timestamp) as timestamp from (" + " UNION ALL ".join(sub_queries) + ") as t"
 
 
 @middleware.unsafe()
@@ -177,16 +177,13 @@ def time_based_ranking(achievement_id, config, db, params):
     logging.debug("time_based_ranking @ {}".format(achievement_id))
 
     tables = config.tables
-    device_id_subquery = "SELECT DISTINCT device_id FROM {}"
 
-    d = {}
-    device_id_query = " UNION ".join([device_id_subquery.format(table) for table in tables])
-    db.execute(device_id_query)
-    device_ids = [record["device_id"] for record in db.fetchall()]
-    for device_id in device_ids:
-        timestamp_query = get_timestamp_query(tables=tables, device_id="%(device_id)s")
-        db.execute(timestamp_query, {'device_id': device_id})
-        d[device_id] = db.fetchone()['timestamp']
+    template = "SELECT device_id, min(timestamp) as timestamp FROM {} GROUP BY device_id"
+    subqueries = "UNION ALL ".join(["(" + template.format(table) + ")" for table in tables])
+    query = "SELECT device_id, min(timestamp) as timestamp FROM (" + subqueries + ") as t GROUP BY device_id"
+    db.execute(query)
+    d = {record["device_id"]: record["timestamp"] for record in db.fetchall()}
+
     return [dict_for(d, device_id) for device_id in sorted(d, key=lambda k: d[k])]
 
 
