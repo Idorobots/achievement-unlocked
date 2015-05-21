@@ -1,3 +1,4 @@
+import datetime
 import easydict
 import logging
 import middleware
@@ -51,10 +52,48 @@ def get_count_query(tables, device_id):
     template = "SELECT count(*) FROM {table}"
 
     if device_id:
-        template = template + " WHERE device_id = {}".format(device_id);
+        template = template + " WHERE device_id = {}".format(device_id)
 
     sub_queries = ["(" + template.format(table=table) + ")" for table in tables]
     return "(SELECT " + " + ".join(sub_queries) + " AS 'result')"
+
+
+@middleware.unsafe()
+def time_based_badge(achievement_id, config, db, params):
+    logging.debug("time_based_badge @ {}/{}".format(params.device_id, achievement_id))
+
+    query = get_timestamp_query(config.tables, "%(device_id)s") + ";"
+    db.execute(query, {'device_id': params.device_id})
+    timestamp = db.fetchone()['timestamp'] / 1000  # It's a kind of magic
+    now = datetime.datetime.now()  # TODO now() or utcnow()
+    timedelta = now - datetime.datetime.fromtimestamp(timestamp)  # TODO fromtimestamp(t) or fromutctimestamp(t)
+
+    thresholds = config.thresholds
+    badges = config.badges
+
+    for (b, t) in zip(badges, thresholds):
+        if timedelta >= t:
+            badge = b
+        else:
+            next_badge_at = (now - timedelta + t).timestamp()
+            break
+
+    if timedelta >= thresholds[-1]:
+        next_badge_at = None
+
+    return {"badge": badge,
+            "value": timestamp,
+            "next_badge_at": next_badge_at}
+
+
+def get_timestamp_query(tables, device_id):
+    template = "SELECT timestamp FROM {table}"
+    if device_id:
+        template = template + " WHERE device_id = {}".format(device_id)
+    template = template + " ORDER BY timestamp ASC LIMIT 1"
+
+    sub_queries = ["(" + template.format(table=table) + ")" for table in tables]
+    return " UNION ALL ".join(sub_queries) + " ORDER BY timestamp ASC LIMIT 1"
 
 
 @middleware.unsafe()
@@ -69,6 +108,13 @@ def proc_based_place(achievement_id, config, db, params):
     device_id = params.device_id
     logging.debug("proc_based_place @ {}/{}".format(device_id, achievement_id))
     return index_of(proc_based_ranking(achievement_id, config, db, params), device_id)
+
+
+@middleware.unsafe()
+def time_based_place(achievement_id, config, db, params):
+    device_id = params.device_id
+    logging.debug("time_based_place @ {}/{}".format(device_id, achievement_id))
+    return index_of(time_based_ranking(achievement_id, config, db, params), device_id)
 
 
 def index_of(l, key):
@@ -87,7 +133,7 @@ def count_based_ranking(achievement_id, config, db, params):
 
 @middleware.unsafe()
 def proc_based_ranking(achievement_id, config, db, params):
-    logging.debug("count_based_ranking @ {}".format(achievement_id))
+    logging.debug("proc_based_ranking @ {}".format(achievement_id))
     counts = get_counts(db, config.tables, params)
     sum = 0
     for c in counts:
@@ -122,6 +168,28 @@ def get_counts(db, tables, params):
     return [{"device_id": k, "value": ranking[k]} for k in keys]
 
 
+@middleware.unsafe()
+def time_based_ranking(achievement_id, config, db, params):
+    def dict_for(d, device_id):
+        return {"device_id": device_id,
+                "value": d[device_id]}
+
+    logging.debug("time_based_ranking @ {}".format(achievement_id))
+
+    tables = config.tables
+    device_id_subquery = "SELECT DISTINCT device_id FROM {}"
+
+    d = {}
+    device_id_query = " UNION ".join([device_id_subquery.format(table) for table in tables])
+    db.execute(device_id_query)
+    device_ids = [record["device_id"] for record in db.fetchall()]
+    for device_id in device_ids:
+        timestamp_query = get_timestamp_query(tables=tables, device_id="%(device_id)s")
+        db.execute(timestamp_query, {'device_id': device_id})
+        d[device_id] = db.fetchone()['timestamp']
+    return [dict_for(d, device_id) for device_id in sorted(d, key=lambda k: d[k])]
+
+
 def build_time_range(frm, to):
     return {"from": frm or "0",
             "to": to or str(int(time.time()) * 1000)} # NOTE Aware stores timestamps in unixtime millis
@@ -135,24 +203,29 @@ def dispatch(handlers, config, achievement_id, db, params={}):
 
 # Handler initialization
 
+# TODO
 achievement_handlers = {
     "count_based": count_based_badge,
-    "procent_based": proc_based_badge
+    "procent_based": proc_based_badge,
+    "time_based": time_based_badge
 }
 
 ranking_handlers = {
     "count_based": count_based_ranking,
-    "procent_based": proc_based_ranking
+    "procent_based": proc_based_ranking,
+    "time_based": time_based_ranking
 }
 
 user_achievement_handlers = {
     "count_based": count_based_badge,
-    "procent_based": proc_based_badge
+    "procent_based": proc_based_badge,
+    "time_based":  time_based_badge
 }
 
 user_ranking_handlers = {
     "count_based": count_based_place,
-    "procent_based": proc_based_place
+    "procent_based": proc_based_place,
+    "time_based": time_based_place
 }
 
 

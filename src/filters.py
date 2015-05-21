@@ -4,7 +4,8 @@ import errors
 filters = {
     "all": lambda c: True,
     "count": lambda c: "count" in c,
-    "procent": lambda c: "procent" in c
+    "procent": lambda c: "procent" in c,
+    "time": lambda c: "time" in c
 }
 
 
