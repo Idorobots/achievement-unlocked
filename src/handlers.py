@@ -33,6 +33,22 @@ def wifi_security_special_badge(achievement_id, config, db, params):
     return query_based_badge(query, config, db, params)
 
 
+@middleware.unsafe()
+def wifi_funny_special_badge(achievement_id, config, db, params):
+    logging.debug("wifi_funny_special_badge @ {}/{}".format(params.device_id, achievement_id))
+    template = ("(SELECT count(*) FROM {} "
+                "WHERE device_id = %(device_id)s "
+                "AND ssid LIKE '%%{}%%')")
+    sub_queries = {k: template.format(config.table, k) for (k, _) in config.badges.items()}
+    sub_queries = ["{} AS '{}'".format(s, k) for k, s in sub_queries.items()]
+    query = "SELECT " + ", ".join(sub_queries) + ";"
+    db.execute(query, {'device_id': params.device_id})
+    return [{"badge": config.badges[k],
+             "value": k}
+            for k, c in db.fetchone().items()
+            if c > 0]
+
+
 # Generic *_based_badge handler.
 def query_based_badge(query, config, db, params):
     db.execute(query, {'device_id': params.device_id})
@@ -222,7 +238,8 @@ user_achievement_handlers = {
     "count_based": count_based_badge,
     "procent_based": proc_based_badge,
     "time_based":  time_based_badge,
-    "wifi_security_special": wifi_security_special_badge
+    "wifi_security_special": wifi_security_special_badge,
+    "wifi_funny_special": wifi_funny_special_badge
 }
 
 user_ranking_handlers = {

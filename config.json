@@ -287,7 +287,7 @@
             }
         },
 
-        "wifi_security": {
+        "wifi_special": {
             "no_defaults": true,
 
             "procent": {
@@ -296,8 +296,17 @@
                 "badges": ["Guys, NSA...", "Gambler", "Better safe than sorry!"]
             },
 
+            "funny": {
+                "table": "sensor_wifi",
+                "badges": {
+                    "apple": "Jobs would be proud...",
+                    "AGH": "Tradycja i nowoczesność"
+                }
+            },
+
             "handlers": {
-                "procent": "wifi_security_special"
+                "procent": "wifi_security_special",
+                "funny": "wifi_funny_special"
             }
         }
     }
