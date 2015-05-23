@@ -54,7 +54,7 @@ class Config(object):
                 add_defaults(subconfig=a['procent'], default=tables)
             if 'time' in a:
                 add_defaults(subconfig=a['time'], default=tables)
-            a['time']['thresholds'] = [time_threshold(t) for t in a['time']['thresholds']]
+                a['time']['thresholds'] = [time_threshold(t) for t in a['time']['thresholds']]
 
     def __init__(self, config):
         self.__config = config
