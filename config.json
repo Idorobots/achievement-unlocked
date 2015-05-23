@@ -285,6 +285,20 @@
                     "Tsunami"
                 ]
             }
+        },
+
+        "wifi_security": {
+            "no_defaults": true,
+
+            "procent": {
+                "table": "wifi",
+                "thresholds": [0.0, 0.5, 1.0],
+                "badges": ["Guys, NSA...", "Gambler", "Better safe than sorry!"]
+            },
+
+            "handlers": {
+                "procent": "wifi_security_special"
+            }
         }
     }
 }

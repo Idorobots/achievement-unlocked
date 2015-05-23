@@ -45,7 +45,7 @@ class Config(object):
         achievements = self.__config['achievements']
         default = achievements.pop('default')
         for a in achievements.values():
-            tables = {'tables':  a.pop('tables')}
+            tables = 'tables' in a and {'tables': a.pop('tables')} or {}
             if 'no_defaults' not in a or not a['no_defaults']:
                 add_defaults(subconfig=a, default=default)
             if 'count' in a:

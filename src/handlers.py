@@ -22,6 +22,17 @@ def proc_based_badge(achievement_id, config, db, params):
     return query_based_badge(query, config, db, params)
 
 
+@middleware.unsafe()
+def wifi_security_special_badge(achievement_id, config, db, params):
+    logging.debug("wifi_security_special_badge @ {}/{}".format(params.device_id, achievement_id))
+    numerator = ("(SELECT count(*) FROM {}"
+                 " WHERE device_id = %(device_id)s "
+                 "AND security NOT LIKE '%%WPA%%')").format(config.table)
+    denominator = "(SELECT count(*) FROM {} WHERE device_id = %(device_id)s)".format(config.table)
+    query = "SELECT 1 - {} / {} AS 'result';".format(numerator, denominator)
+    return query_based_badge(query, config, db, params)
+
+
 # Generic *_based_badge handler.
 def query_based_badge(query, config, db, params):
     db.execute(query, {'device_id': params.device_id})
@@ -216,7 +227,8 @@ ranking_handlers = {
 user_achievement_handlers = {
     "count_based": count_based_badge,
     "procent_based": proc_based_badge,
-    "time_based":  time_based_badge
+    "time_based":  time_based_badge,
+    "wifi_security_special": wifi_security_special_badge
 }
 
 user_ranking_handlers = {
