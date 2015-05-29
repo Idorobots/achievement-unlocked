@@ -45,7 +45,7 @@ class Config(object):
         achievements = self.__config['achievements']
         default = achievements.pop('default')
         for a in achievements.values():
-            tables = {'tables':  a.pop('tables')}
+            tables = 'tables' in a and {'tables': a.pop('tables')} or {}
             if 'no_defaults' not in a or not a['no_defaults']:
                 add_defaults(subconfig=a, default=default)
             if 'count' in a:
@@ -54,7 +54,7 @@ class Config(object):
                 add_defaults(subconfig=a['procent'], default=tables)
             if 'time' in a:
                 add_defaults(subconfig=a['time'], default=tables)
-            a['time']['thresholds'] = [time_threshold(t) for t in a['time']['thresholds']]
+                a['time']['thresholds'] = [time_threshold(t) for t in a['time']['thresholds']]
 
     def __init__(self, config):
         self.__config = config

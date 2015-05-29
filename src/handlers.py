@@ -15,11 +15,46 @@ def count_based_badge(achievement_id, config, db, params):
 @middleware.unsafe()
 def proc_based_badge(achievement_id, config, db, params):
     logging.debug("proc_based_badge @ {}/{}".format(params.device_id, achievement_id))
-    nominator = get_count_query(config.tables, "%(device_id)s")
+    numerator = get_count_query(config.tables, "%(device_id)s")
     denominator = get_count_query(config.tables, None)
     # Achievement unlocked: Triple nested SELECT
-    query = "SELECT {} / {} AS 'result';".format(nominator, denominator)
+    query = "SELECT {} / {} AS 'result';".format(numerator, denominator)
     return query_based_badge(query, config, db, params)
+
+
+@middleware.unsafe()
+def wifi_security_special_badge(achievement_id, config, db, params):
+    logging.debug("wifi_security_special_badge @ {}/{}".format(params.device_id, achievement_id))
+    query = "SELECT DISTINCT ssid FROM {} WHERE device_id = %(device_id)s;"
+    db.execute(query.format(config.ssid_table), {"device_id": params.device_id})
+    ssids = ",".join(["'{}'".format(s["ssid"]) for s in db.fetchall()])
+
+    data = config.data_table
+    numerator = ("(SELECT count(*) FROM {} "
+                 "WHERE device_id = %(device_id)s "
+                 "AND ssid IN ({}) "
+                 "AND security NOT LIKE '%%WPA%%')").format(data, ssids)
+    denominator = ("(SELECT count(*) FROM {} "
+                   "WHERE device_id = %(device_id)s "
+                   "AND ssid IN ({}))").format(data, ssids)
+    query = "SELECT 1 - {} / {} AS 'result';".format(numerator, denominator)
+    return query_based_badge(query, config, db, params)
+
+
+@middleware.unsafe()
+def wifi_funny_special_badge(achievement_id, config, db, params):
+    logging.debug("wifi_funny_special_badge @ {}/{}".format(params.device_id, achievement_id))
+    template = ("(SELECT count(*) FROM {} "
+                "WHERE device_id = %(device_id)s "
+                "AND ssid LIKE '%%{}%%')")
+    sub_queries = {k: template.format(config.table, k) for (k, _) in config.badges.items()}
+    sub_queries = ["{} AS '{}'".format(s, k) for k, s in sub_queries.items()]
+    query = "SELECT " + ", ".join(sub_queries) + ";"
+    db.execute(query, {'device_id': params.device_id})
+    return [{"badge": config.badges[k],
+             "value": k}
+            for k, c in db.fetchone().items()
+            if c > 0]
 
 
 # Generic *_based_badge handler.
@@ -88,8 +123,10 @@ def time_based_badge(achievement_id, config, db, params):
 
 def get_time_query(tables, device_id):
     template = "SELECT timestamp FROM {table}"
+
     if device_id:
         template = template + " WHERE device_id={}".format(device_id)
+
     template = template + " ORDER BY timestamp ASC LIMIT 1"
     sub_queries = ["(" + template.format(table=table) + ")" for table in tables]
 
@@ -199,14 +236,6 @@ def dispatch(handlers, config, achievement_id, db, params={}):
 
 
 # Handler initialization
-
-# TODO
-achievement_handlers = {
-    "count_based": count_based_badge,
-    "procent_based": proc_based_badge,
-    "time_based": time_based_badge
-}
-
 ranking_handlers = {
     "count_based": count_based_ranking,
     "procent_based": proc_based_ranking,
@@ -216,7 +245,9 @@ ranking_handlers = {
 user_achievement_handlers = {
     "count_based": count_based_badge,
     "procent_based": proc_based_badge,
-    "time_based":  time_based_badge
+    "time_based":  time_based_badge,
+    "wifi_security_special": wifi_security_special_badge,
+    "wifi_funny_special": wifi_funny_special_badge
 }
 
 user_ranking_handlers = {
@@ -227,7 +258,6 @@ user_ranking_handlers = {
 
 
 handlers = easydict.EasyDict({})
-handlers.achievements = achievement_handlers
 handlers.ranking = ranking_handlers
 handlers.user = {}
 handlers.user.achievements = user_achievement_handlers

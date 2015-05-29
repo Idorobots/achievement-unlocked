@@ -285,6 +285,30 @@
                     "Tsunami"
                 ]
             }
+        },
+
+        "wifi_special": {
+            "no_defaults": true,
+
+            "security": {
+                "ssid_table": "sensor_wifi",
+                "data_table": "wifi",
+                "thresholds": [0.0, 0.5, 1.0],
+                "badges": ["Guys, NSA...", "Gambler", "Better safe than sorry!"]
+            },
+
+            "funny": {
+                "table": "sensor_wifi",
+                "badges": {
+                    "apple": "Jobs would be proud...",
+                    "AGH": "Tradycja i nowoczesność"
+                }
+            },
+
+            "handlers": {
+                "security": "wifi_security_special",
+                "funny": "wifi_funny_special"
+            }
         }
     }
 }
