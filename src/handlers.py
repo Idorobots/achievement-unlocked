@@ -25,10 +25,18 @@ def proc_based_badge(achievement_id, config, db, params):
 @middleware.unsafe()
 def wifi_security_special_badge(achievement_id, config, db, params):
     logging.debug("wifi_security_special_badge @ {}/{}".format(params.device_id, achievement_id))
-    numerator = ("(SELECT count(*) FROM {}"
-                 " WHERE device_id = %(device_id)s "
-                 "AND security NOT LIKE '%%WPA%%')").format(config.table)
-    denominator = "(SELECT count(*) FROM {} WHERE device_id = %(device_id)s)".format(config.table)
+    query = "SELECT DISTINCT ssid FROM {} WHERE device_id = %(device_id)s;"
+    db.execute(query.format(config.ssid_table), {"device_id": params.device_id})
+    ssids = ",".join(["'{}'".format(s["ssid"]) for s in db.fetchall()])
+
+    data = config.data_table
+    numerator = ("(SELECT count(*) FROM {} "
+                 "WHERE device_id = %(device_id)s "
+                 "AND ssid IN ({}) "
+                 "AND security NOT LIKE '%%WPA%%')").format(data, ssids)
+    denominator = ("(SELECT count(*) FROM {} "
+                   "WHERE device_id = %(device_id)s "
+                   "AND ssid IN ({}))").format(data, ssids)
     query = "SELECT 1 - {} / {} AS 'result';".format(numerator, denominator)
     return query_based_badge(query, config, db, params)
 

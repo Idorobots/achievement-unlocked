@@ -290,8 +290,9 @@
         "wifi_special": {
             "no_defaults": true,
 
-            "procent": {
-                "table": "wifi",
+            "security": {
+                "ssid_table": "sensor_wifi",
+                "data_table": "wifi",
                 "thresholds": [0.0, 0.5, 1.0],
                 "badges": ["Guys, NSA...", "Gambler", "Better safe than sorry!"]
             },
@@ -305,7 +306,7 @@
             },
 
             "handlers": {
-                "procent": "wifi_security_special",
+                "security": "wifi_security_special",
                 "funny": "wifi_funny_special"
             }
         }
