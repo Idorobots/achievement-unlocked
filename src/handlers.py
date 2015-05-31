@@ -57,6 +57,28 @@ def wifi_funny_special_badge(achievement_id, config, db, params):
             if c > 0]
 
 
+@middleware.unsafe()
+def network_percent_data_badge(achievement_id, config, db, params):
+    logging.debug("network_count_data_badge @ {}/{}".format(params.device_id, achievement_id))
+    query = ("SELECT sum(double_received_bytes) as data_received, sum(double_sent_bytes) as data_sent "
+             "FROM {} WHERE device_id = %(device_id)s".format(config.table))
+    db.execute(query + ";", {'device_id': params.device_id})
+    row = db.fetchone()
+    data_received = row['data_received']
+    data_sent = row['data_sent']
+    data_total = data_received + data_sent
+    result = None
+    if data_sent >= data_total * config.thresholds.sender:
+        result = {"badge": config.badges.sender,
+                  "ratio": data_sent / data_total,
+                  "threshold": config.thresholds.sender}
+    elif data_received >= data_total * config.thresholds.receiver:
+        result = {"badge": config.badges.receiver,
+                  "ratio": data_received / data_total,
+                  "threshold": config.thresholds.receiver}
+    return result
+
+
 # Generic *_based_badge handler.
 def query_based_badge(query, config, db, params):
     db.execute(query, {'device_id': params.device_id})
@@ -247,7 +269,8 @@ user_achievement_handlers = {
     "procent_based": proc_based_badge,
     "time_based":  time_based_badge,
     "wifi_security_special": wifi_security_special_badge,
-    "wifi_funny_special": wifi_funny_special_badge
+    "wifi_funny_special": wifi_funny_special_badge,
+    "network_percent_data": network_percent_data_badge
 }
 
 user_ranking_handlers = {

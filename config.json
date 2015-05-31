@@ -315,6 +315,26 @@
                 "security": "wifi_security_special",
                 "funny": "wifi_funny_special"
             }
+        },
+
+        "network_data": {
+            "no_defaults": true,
+            
+            "percent": {
+                "table": "network_traffic",
+                "thresholds": {
+                    "receiver": 0.9,
+                    "sender": 0.5
+                },
+                "badges": {
+                    "receiver": "Leecher",
+                    "sender": "Seeder"
+                }
+            },
+
+            "handlers": {
+                "percent": "network_percent_data"
+            }
         }
     }
 }
