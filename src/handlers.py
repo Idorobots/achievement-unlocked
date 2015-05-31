@@ -59,14 +59,16 @@ def wifi_funny_special_badge(achievement_id, config, db, params):
 
 @middleware.unsafe()
 def network_percent_data_badge(achievement_id, config, db, params):
-    logging.debug("network_count_data_badge @ {}/{}".format(params.device_id, achievement_id))
-    query = ("SELECT sum(double_received_bytes) as data_received, sum(double_sent_bytes) as data_sent "
+    logging.debug("network_percent_data_badge @ {}/{}".format(params.device_id, achievement_id))
+    query = ("SELECT sum(double_received_bytes) AS data_received, sum(double_sent_bytes) AS data_sent "
              "FROM {} WHERE device_id = %(device_id)s".format(config.table))
+
     db.execute(query + ";", {'device_id': params.device_id})
     row = db.fetchone()
     data_received = row['data_received']
     data_sent = row['data_sent']
     data_total = data_received + data_sent
+
     result = None
     if data_sent >= data_total * config.thresholds.sender:
         result = {"badge": config.badges.sender,
