@@ -82,7 +82,10 @@
         },
 
         "bluetooth": {
-            "tables": ["bluetooth"],
+            "tables": [
+                "bluetooth",
+                "sensor_bluetooth"
+            ],
             "count": {
                 "badges": [
                     "Harald Blåtand Gormsen",
@@ -277,7 +280,10 @@
         },
 
         "wifi": {
-            "tables": ["wifi"],
+            "tables": [
+                "wifi",
+                "sensor_wifi"
+            ],
             "count": {
                 "badges": [
                     "Wave",
