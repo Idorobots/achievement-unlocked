@@ -335,6 +335,36 @@
             "handlers": {
                 "percent": "network_percent_data"
             }
+        },
+
+        "battery_usage": {
+            "no_defaults": true,
+
+            "mean": {
+                "tables": {
+                    "charges": "battery_charges",
+                    "discharges": "battery_discharges"
+                },
+                "thresholds": {
+                    "low": {
+                        "charge_times": 0.5,
+                        "discharge_level": 25.0
+                    },
+                    "high": {
+                        "charge_times": 1.0,
+                        "discharge_level": 50.0
+                    }
+                },
+                "badges": {
+                    "low": "100% green",
+                    "high": "(im)mobile device"
+                }
+            },
+
+            "handlers": {
+                "mean": "battery_mean_usage"
+            }
+            
         }
     }
 }
