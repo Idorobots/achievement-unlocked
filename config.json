@@ -82,7 +82,10 @@
         },
 
         "bluetooth": {
-            "tables": ["bluetooth"],
+            "tables": [
+                "bluetooth",
+                "sensor_bluetooth"
+            ],
             "count": {
                 "badges": [
                     "Harald Blåtand Gormsen",
@@ -277,7 +280,10 @@
         },
 
         "wifi": {
-            "tables": ["wifi"],
+            "tables": [
+                "wifi",
+                "sensor_wifi"
+            ],
             "count": {
                 "badges": [
                     "Wave",
@@ -309,6 +315,56 @@
                 "security": "wifi_security_special",
                 "funny": "wifi_funny_special"
             }
+        },
+
+        "network_data": {
+            "no_defaults": true,
+            
+            "percent": {
+                "table": "network_traffic",
+                "thresholds": {
+                    "receiver": 0.9,
+                    "sender": 0.5
+                },
+                "badges": {
+                    "receiver": "Leecher",
+                    "sender": "Seeder"
+                }
+            },
+
+            "handlers": {
+                "percent": "network_percent_data"
+            }
+        },
+
+        "battery_usage": {
+            "no_defaults": true,
+
+            "mean": {
+                "tables": {
+                    "charges": "battery_charges",
+                    "discharges": "battery_discharges"
+                },
+                "thresholds": {
+                    "low": {
+                        "charge_times": 0.5,
+                        "discharge_level": 25.0
+                    },
+                    "high": {
+                        "charge_times": 1.0,
+                        "discharge_level": 50.0
+                    }
+                },
+                "badges": {
+                    "low": "100% green",
+                    "high": "(im)mobile device"
+                }
+            },
+
+            "handlers": {
+                "mean": "battery_mean_usage"
+            }
+            
         }
     }
 }

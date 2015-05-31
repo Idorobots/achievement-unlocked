@@ -7,7 +7,8 @@ filters = {
     "procent": lambda c: "procent" in c,
     "time": lambda c: "time" in c,
     "funny": lambda c: "funny" in c,
-    "security": lambda c: "security" in c
+    "security": lambda c: "security" in c,
+    "mean": lambda c: "mean" in c
 }
 
 
