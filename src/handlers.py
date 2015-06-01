@@ -127,6 +127,9 @@ def query_based_badge(query, config, db, params):
     if count >= thresholds[-1]:
         next_badge_at = None
 
+    if badge is None:
+        return None
+
     return {"badge": badge,
             "value": count,
             "next_badge_at": next_badge_at}
