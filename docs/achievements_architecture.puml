@@ -1,0 +1,25 @@
+@startuml
+skinparam componentStyle uml2
+skinparam backgroundColor #FFE9A8
+
+
+:Client: as Client
+
+database "MySQL" as DB {
+    frame "AWARE data" {
+        [sensor_table]
+    }
+}
+
+package "App" {
+    interface "REST API" as REST
+    component "Handler logic" as HL
+    component "Configuration data" as Conf
+}
+
+Client --> REST : api query
+REST - HL
+HL -- Conf
+HL --> [sensor_table] : data query
+
+@enduml
