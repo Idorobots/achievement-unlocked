@@ -3,6 +3,7 @@ import easydict
 import logging
 import middleware
 import time
+from errors import UnknownAchievementHandler
 
 
 @middleware.unsafe()
@@ -281,17 +282,31 @@ def build_time_range(frm, to):
             "to": to or str(int(time.time()) * 1000)} # NOTE Aware stores timestamps in unixtime millis
 
 
+def dummy_handler(achievement_id, config, db, params):
+    logging.debug("Implement me! :(")
+    return None
+
+
 # Handler dispatch:
-@middleware.unsafe()
 def dispatch(handlers, config, achievement_id, db, params={}):
-    return {k: handlers[h](achievement_id, c, db, easydict.EasyDict(params)) for k, (h, c) in config.items()}
+    result = {}
+    for k, (h, c) in config.items():
+        if h in handlers:
+            result[k] = handlers[h](achievement_id, c, db, easydict.EasyDict(params))
+        else:
+            raise UnknownAchievementHandler(h)
+    return result
 
 
 # Handler initialization
 ranking_handlers = {
     "count_based": count_based_ranking,
     "procent_based": proc_based_ranking,
-    "time_based": time_based_ranking
+    "time_based": time_based_ranking,
+    "wifi_security_special": dummy_handler,
+    "wifi_funny_special": dummy_handler,
+    "network_percent_data": dummy_handler,
+    "battery_mean_usage": dummy_handler
 }
 
 user_achievement_handlers = {
@@ -307,7 +322,11 @@ user_achievement_handlers = {
 user_ranking_handlers = {
     "count_based": count_based_place,
     "procent_based": proc_based_place,
-    "time_based": time_based_place
+    "time_based": time_based_place,
+    "wifi_security_special": dummy_handler,
+    "wifi_funny_special": dummy_handler,
+    "network_percent_data": dummy_handler,
+    "battery_mean_usage": dummy_handler
 }
 
 
