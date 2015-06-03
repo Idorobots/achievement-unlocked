@@ -75,7 +75,7 @@ class InternalError(AppError):
         return "U dun goofed."
 
 
-class UnknownHandler(InternalError):
+class UnknownAchievementHandler(InternalError):
     def __init__(self, handler):
         self.__message = "Unknown handler: '{}'.".format(handler)
 
